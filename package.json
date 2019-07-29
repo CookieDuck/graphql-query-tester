@@ -1,0 +1,28 @@
+{
+  "name": "graphql-query-tester",
+  "version": "0.0.1",
+  "description": "Library for testing graphql queries",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CookieDuck/graphql-query-tester.git"
+  },
+  "keywords": [
+    "graphql",
+    "test",
+    "testing"
+  ],
+  "author": "Paul Ganster",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/CookieDuck/graphql-query-tester/issues"
+  },
+  "homepage": "https://github.com/CookieDuck/graphql-query-tester#readme",
+  "devDependencies": {
+    "chai": "4.2.0",
+    "mocha": "6.2.0"
+  }
+}
