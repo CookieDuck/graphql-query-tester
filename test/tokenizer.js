@@ -30,5 +30,23 @@ describe('String tokenizer', function() {
       \r\r\r`);
       expect(result).to.eql(['{', 'files', '}'])
     });
+
+    it('Handles tab characters', function() {
+      const result = tokenizer.parse(`\t\t   \t
+        {  \t
+   \t     files \t
+        }
+      \t\t\t`);
+      expect(result).to.eql(['{', 'files', '}'])
+    });
+
+    it('Handles a really funky string', function() {
+      const result = tokenizer.parse(`\r\r   \r
+        {  \n\r
+ \r\n\t   files \r\n
+        }
+      \r\t\r`);
+      expect(result).to.eql(['{', 'files', '}'])
+    });
   });
 });
