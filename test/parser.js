@@ -88,8 +88,44 @@ describe('Parser for lexed tokens', function() {
     });
 
     it('Equivalent queries but in different order produce equivalent ASTs', function() {
-      //TODO
-      expect.fail();
+      const graphql1 = `
+      {
+        a
+        b
+        c {
+          d
+          e {
+            f
+          }
+        }
+      }`;
+      const graphql2 = `
+      {
+        c {
+          e {
+            f
+          }
+          d
+        }
+        a
+        b
+      }`;
+      const expected = root(
+        scalar('a'),
+        scalar('b'),
+        complex('c',
+          scalar('d'),
+          complex('e',
+            scalar('f'),
+          ),
+        ),
+      );
+
+      const result1 = parser.createAst(graphql1);
+      expect(result1).to.eql(expected);
+
+      const result2 = parser.createAst(graphql2);
+      expect(result2).to.eql(expected);
     });
   });
 
