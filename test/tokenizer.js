@@ -40,7 +40,7 @@ describe('String tokenizer', function() {
       expect(result).to.eql(['{', 'files', '}'])
     });
 
-    it('Handles a really funky string', function() {
+    it('Handles a really funky (but legitimate) string', function() {
       const result = tokenizer.parse(`\r\r   \r
         {  \n\r
  \r\n\t   files \r\n
