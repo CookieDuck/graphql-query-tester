@@ -13,29 +13,63 @@ describe('Parser for lexed tokens', function() {
       }`;
 
       const expected = {
-        'root': {
-          '_type': dict.FIELD_COMPLEX,
-          '_value': 'root',
-          'files': {
-            '_type': dict.FIELD_SCALAR,
-            '_value': 'files',
+        'type': dict.FIELD_COMPLEX,
+        'value': 'root',
+        'children': [
+          {
+            'type': dict.FIELD_SCALAR,
+            'value': 'files',
           },
-          'images': {
-            '_type': dict.FIELD_SCALAR,
-            '_value': 'images',
+          {
+            'type': dict.FIELD_SCALAR,
+            'value': 'images',
           },
-          'users': {
-            '_type': dict.FIELD_SCALAR,
-            '_value': 'users',
+          {
+            'type': dict.FIELD_SCALAR,
+            'value': 'users',
           },
-        }
+        ],
       };
 
       const result = parser.createAst(graphql);
       expect(result).to.eql(expected);
     });
 
-    it('Parses a complex query', function() {
+    it('Parses a slightly complex query', function() {
+      const graphql = `
+      {
+        images {
+          name
+          extension
+        }
+      }
+      `;
+      const expected = {
+        'type': dict.FIELD_COMPLEX,
+        'value': 'root',
+        'children': [
+          {
+            'type': dict.FIELD_COMPLEX,
+            'value': 'images',
+            'children': [
+              {
+                'type': dict.FIELD_SCALAR,
+                'value': 'name',
+              },
+              {
+                'type': dict.FIELD_SCALAR,
+                'value': 'extension',
+              },
+            ],
+          },
+        ],
+      };
+
+      const result = parser.createAst(graphql);
+      expect(result).to.eql(expected);
+    });
+
+    it('Parses a more complex query', function() {
       const graphql = `
       {
         images {
@@ -56,52 +90,66 @@ describe('Parser for lexed tokens', function() {
       }
       `;
       const expected = {
-        'root': {
-          '_type': dict.FIELD_COMPLEX,
-          '_value': 'root',
-          'images': {
-            '_type': dict.FIELD_COMPLEX,
-            '_value': 'images',
-            'name': {
-              '_type': dict.FIELD_COMPLEX,
-              '_value': 'name',
-            },
-            'extension': {
-              '_type': dict.FIELD_COMPLEX,
-              '_value': 'extension',
-            },
+        'type': dict.FIELD_COMPLEX,
+        'value': 'root',
+        'children': [
+          {
+            'type': dict.FIELD_SCALAR,
+            'value': 'users',
           },
-          'users': {
-            '_type': dict.FIELD_COMPLEX,
-            '_value': 'users',
+          {
+            'type': dict.FIELD_COMPLEX,
+            'value': 'images',
+            'children': [
+              {
+                'type': dict.FIELD_SCALAR,
+                'value': 'name',
+              },
+              {
+                'type': dict.FIELD_SCALAR,
+                'value': 'extension',
+              },
+            ],
           },
-          'resources': {
-            'files': {
-              'name': {
-                '_type': dict.FIELD_COMPLEX,
-                '_value': 'name',
+          {
+            'type': dict.FIELD_COMPLEX,
+            'value': 'resources',
+            'children': [
+              {
+                'type': dict.FIELD_COMPLEX,
+                'value': 'files',
+                'children': [
+                  {
+                    'type': dict.FIELD_SCALAR,
+                    'value': 'name',
+                  },
+                  {
+                    'type': dict.FIELD_SCALAR,
+                    'value': 'extension'
+                  },
+                ],
               },
-              'extension': {
-                '_type': dict.FIELD_COMPLEX,
-                '_value': 'extension',
+              {
+                'type': dict.FIELD_COMPLEX,
+                'value': 'images',
+                'children': [
+                  {
+                    'type': dict.FIELD_SCALAR,
+                    'value': 'name',
+                  },
+                  {
+                    'type': dict.FIELD_SCALAR,
+                    'value': 'extension'
+                  },
+                ],
               },
-            },
-            'images': {
-              'name': {
-                '_type': dict.FIELD_COMPLEX,
-                '_value': 'name',
-              },
-              'extension': {
-                '_type': dict.FIELD_COMPLEX,
-                '_value': 'extension',
-              },
-            },
+            ],
           },
-        }
+        ],
       };
+
+      //TODO write helper tree builder functions for tests
       const result = parser.createAst(graphql);
-      console.log('RESULT');
-      console.log(result);
       expect(result).to.eql(expected);
     });
 
