@@ -47,4 +47,20 @@ describe('Lexer for tokens', function() {
     const depths = result.map((item) => item.depth);
     expect(depths).to.eql([0, 1, 1, 2, 1, 0]);
   });
+
+  describe('Lexing errors', function() {
+    describe('Uneven curly braces', function() {
+      it('Too many open curly braces', function() {
+        const tokens = tokenizer.parse('{ bad { }');
+
+        expect(() => lexer.lex(tokens, true)).to.throw("Syntax error: Found 2 '{' but only 1 '}'");
+      });
+
+      it('Too many close curly braces', function() {
+        const tokens = tokenizer.parse('{ bad { } } }');
+
+        expect(() => lexer.lex(tokens, true)).to.throw("Syntax error: Found 3 '}' but only 2 '{'");
+      });
+    });
+  });
 });

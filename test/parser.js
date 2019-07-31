@@ -128,20 +128,6 @@ describe('Parser for lexed tokens', function() {
       expect(result2).to.eql(expected);
     });
   });
-
-  describe('Parse errors', function() {
-    describe('Uneven curly braces', function() {
-      it('Too many curly braces', function() {
-        //TODO
-        expect.fail();
-      });
-
-      it('Too few curly braces', function() {
-        //TODO
-        expect.fail();
-      });
-    })
-  });
 });
 
 // Helper functions
