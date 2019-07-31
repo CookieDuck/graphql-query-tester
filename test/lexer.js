@@ -7,14 +7,14 @@ describe('Lexer for tokens', function() {
 
   it('Assigns values to tokens', function() {
     const graphql = '{ files }';
-    const result = lexer.lex(tokenizer.parse(graphql));
+    const result = lexer.lex(tokenizer.tokenize(graphql));
     const values = result.map((item) => item.value);
     expect(values).to.eql(['{', 'files', '}']);
   });
 
   it('Assigns definitions to tokens', function() {
     const graphql = '{ paths { files } }';
-    const result = lexer.lex(tokenizer.parse(graphql));
+    const result = lexer.lex(tokenizer.tokenize(graphql));
     const definitions = result.map((item) => item.definition);
     expect(definitions).to.eql([
       dict.GROUP_START,
@@ -28,7 +28,7 @@ describe('Lexer for tokens', function() {
 
   it('Assigns indices to tokens', function() {
     const graphql = '{ files }';
-    const result = lexer.lex(tokenizer.parse(graphql));
+    const result = lexer.lex(tokenizer.tokenize(graphql));
     const indices = result.map((item) => item.index);
     expect(indices).to.eql([0, 1, 2]);
   });
@@ -43,7 +43,7 @@ describe('Lexer for tokens', function() {
             files
           }
         }`;
-    const result = lexer.lex(tokenizer.parse(graphql));
+    const result = lexer.lex(tokenizer.tokenize(graphql));
     const depths = result.map((item) => item.depth);
     expect(depths).to.eql([0, 1, 1, 2, 1, 0]);
   });
@@ -51,13 +51,13 @@ describe('Lexer for tokens', function() {
   describe('Lexing errors', function() {
     describe('Uneven curly braces', function() {
       it('Too many open curly braces', function() {
-        const tokens = tokenizer.parse('{ bad { }');
+        const tokens = tokenizer.tokenize('{ bad { }');
 
         expect(() => lexer.lex(tokens, true)).to.throw("Syntax error: Found 2 '{' but only 1 '}'");
       });
 
       it('Too many close curly braces', function() {
-        const tokens = tokenizer.parse('{ bad { } } }');
+        const tokens = tokenizer.tokenize('{ bad { } } }');
 
         expect(() => lexer.lex(tokens, true)).to.throw("Syntax error: Found 3 '}' but only 2 '{'");
       });

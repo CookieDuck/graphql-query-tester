@@ -21,7 +21,7 @@ describe('Parser for lexed tokens', function() {
         scalar('users'),
       );
 
-      const result = parser.createAst(graphql);
+      const result = parser.parse(graphql);
       expect(result).to.eql(expected);
     });
 
@@ -41,7 +41,7 @@ describe('Parser for lexed tokens', function() {
         ),
       );
 
-      const result = parser.createAst(graphql);
+      const result = parser.parse(graphql);
       expect(result).to.deep.equalInAnyOrder(expected);
     });
 
@@ -83,7 +83,7 @@ describe('Parser for lexed tokens', function() {
         ),
       );
 
-      const result = parser.createAst(graphql);
+      const result = parser.parse(graphql);
       expect(result).to.deep.equalInAnyOrder(expected);
     });
 
@@ -121,10 +121,10 @@ describe('Parser for lexed tokens', function() {
         ),
       );
 
-      const result1 = parser.createAst(graphql1);
+      const result1 = parser.parse(graphql1);
       expect(result1).to.eql(expected);
 
-      const result2 = parser.createAst(graphql2);
+      const result2 = parser.parse(graphql2);
       expect(result2).to.eql(expected);
     });
   });

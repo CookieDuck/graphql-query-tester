@@ -4,17 +4,17 @@ const tokenizer = require('../lib/tokenizer');
 describe('String tokenizer', function() {
   describe('Removes whitespace', function() {
     it('Handles huge swaths of whitespace between tokens', function() {
-      const result = tokenizer.parse(`{           files                     }`);
+      const result = tokenizer.tokenize(`{           files                     }`);
       expect(result).to.eql(['{', 'files', '}'])
     });
 
     it('Removes leading and trailing whitespace', function() {
-      const result = tokenizer.parse(`             { files }           `);
+      const result = tokenizer.tokenize(`             { files }           `);
       expect(result).to.eql(['{', 'files', '}'])
     });
 
     it('Handles newline characters', function() {
-      const result = tokenizer.parse(`\n\n   \n
+      const result = tokenizer.tokenize(`\n\n   \n
         {  \n
    \n     files \n
         }
@@ -23,7 +23,7 @@ describe('String tokenizer', function() {
     });
 
     it('Handles carriage return characters', function() {
-      const result = tokenizer.parse(`\r\r   \r
+      const result = tokenizer.tokenize(`\r\r   \r
         {  \r
    \r     files \r
         }
@@ -32,7 +32,7 @@ describe('String tokenizer', function() {
     });
 
     it('Handles tab characters', function() {
-      const result = tokenizer.parse(`\t\t   \t
+      const result = tokenizer.tokenize(`\t\t   \t
         {  \t
    \t     files \t
         }
@@ -41,7 +41,7 @@ describe('String tokenizer', function() {
     });
 
     it('Handles a really funky (but legitimate) string', function() {
-      const result = tokenizer.parse(`\r\r   \r
+      const result = tokenizer.tokenize(`\r\r   \r
         {  \n\r
  \r\n\t   files \r\n
         }
