@@ -1,4 +1,8 @@
-const expect = require('chai').expect;
+const deepEqualInAnyOrder = require('deep-equal-in-any-order');
+const chai = require('chai');
+chai.use(deepEqualInAnyOrder);
+const { expect } = chai;
+
 const parser = require('../lib/parser');
 const dict = require('../lib/lexer').dictionary;
 
@@ -11,25 +15,11 @@ describe('Parser for lexed tokens', function() {
         images
         users
       }`;
-
-      const expected = {
-        'type': dict.FIELD_COMPLEX,
-        'value': 'root',
-        'children': [
-          {
-            'type': dict.FIELD_SCALAR,
-            'value': 'files',
-          },
-          {
-            'type': dict.FIELD_SCALAR,
-            'value': 'images',
-          },
-          {
-            'type': dict.FIELD_SCALAR,
-            'value': 'users',
-          },
-        ],
-      };
+      const expected = root(
+        scalar('files'),
+        scalar('images'),
+        scalar('users'),
+      );
 
       const result = parser.createAst(graphql);
       expect(result).to.eql(expected);
@@ -44,29 +34,15 @@ describe('Parser for lexed tokens', function() {
         }
       }
       `;
-      const expected = {
-        'type': dict.FIELD_COMPLEX,
-        'value': 'root',
-        'children': [
-          {
-            'type': dict.FIELD_COMPLEX,
-            'value': 'images',
-            'children': [
-              {
-                'type': dict.FIELD_SCALAR,
-                'value': 'name',
-              },
-              {
-                'type': dict.FIELD_SCALAR,
-                'value': 'extension',
-              },
-            ],
-          },
-        ],
-      };
+      const expected = root(
+        complex('images',
+          scalar('name'),
+          scalar('extension'),
+        ),
+      );
 
       const result = parser.createAst(graphql);
-      expect(result).to.eql(expected);
+      expect(result).to.deep.equalInAnyOrder(expected);
     });
 
     it('Parses a more complex query', function() {
@@ -89,68 +65,26 @@ describe('Parser for lexed tokens', function() {
         }
       }
       `;
-      const expected = {
-        'type': dict.FIELD_COMPLEX,
-        'value': 'root',
-        'children': [
-          {
-            'type': dict.FIELD_SCALAR,
-            'value': 'users',
-          },
-          {
-            'type': dict.FIELD_COMPLEX,
-            'value': 'images',
-            'children': [
-              {
-                'type': dict.FIELD_SCALAR,
-                'value': 'name',
-              },
-              {
-                'type': dict.FIELD_SCALAR,
-                'value': 'extension',
-              },
-            ],
-          },
-          {
-            'type': dict.FIELD_COMPLEX,
-            'value': 'resources',
-            'children': [
-              {
-                'type': dict.FIELD_COMPLEX,
-                'value': 'files',
-                'children': [
-                  {
-                    'type': dict.FIELD_SCALAR,
-                    'value': 'name',
-                  },
-                  {
-                    'type': dict.FIELD_SCALAR,
-                    'value': 'extension'
-                  },
-                ],
-              },
-              {
-                'type': dict.FIELD_COMPLEX,
-                'value': 'images',
-                'children': [
-                  {
-                    'type': dict.FIELD_SCALAR,
-                    'value': 'name',
-                  },
-                  {
-                    'type': dict.FIELD_SCALAR,
-                    'value': 'extension'
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      };
+      const expected = root(
+        complex('images',
+          scalar('name'),
+          scalar('extension'),
+        ),
+        scalar('users'),
+        complex('resources',
+          complex('files',
+            scalar('name'),
+            scalar('extension'),
+          ),
+          complex('images',
+            scalar('name'),
+            scalar('extension'),
+          ),
+        ),
+      );
 
-      //TODO write helper tree builder functions for tests
       const result = parser.createAst(graphql);
-      expect(result).to.eql(expected);
+      expect(result).to.deep.equalInAnyOrder(expected);
     });
 
     it('Equivalent queries but in different order produce equivalent ASTs', function() {
@@ -173,3 +107,23 @@ describe('Parser for lexed tokens', function() {
     })
   });
 });
+
+// Helper functions
+const complex = function(value, ...children) {
+  return {
+    'type': dict.FIELD_COMPLEX,
+    'value': value,
+    'children': children,
+  };
+};
+
+const root = function(...children) {
+  return complex('root', ...children);
+};
+
+const scalar = function(value) {
+  return {
+    'type': dict.FIELD_SCALAR,
+    'value': value,
+  };
+};
