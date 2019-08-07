@@ -5,12 +5,12 @@ describe('String tokenizer', function() {
   describe('Removes whitespace', function() {
     it('Handles huge swaths of whitespace between tokens', function() {
       const result = tokenizer.tokenize(`{           files                     }`);
-      expect(result).to.eql(['{', 'files', '}'])
+      expect(result).to.eql(['{', 'files', '}']);
     });
 
     it('Removes leading and trailing whitespace', function() {
       const result = tokenizer.tokenize(`             { files }           `);
-      expect(result).to.eql(['{', 'files', '}'])
+      expect(result).to.eql(['{', 'files', '}']);
     });
 
     it('Handles newline characters', function() {
@@ -19,7 +19,7 @@ describe('String tokenizer', function() {
    \n     files \n
         }
       \n\n\n`);
-      expect(result).to.eql(['{', 'files', '}'])
+      expect(result).to.eql(['{', 'files', '}']);
     });
 
     it('Handles carriage return characters', function() {
@@ -28,7 +28,7 @@ describe('String tokenizer', function() {
    \r     files \r
         }
       \r\r\r`);
-      expect(result).to.eql(['{', 'files', '}'])
+      expect(result).to.eql(['{', 'files', '}']);
     });
 
     it('Handles tab characters', function() {
@@ -37,7 +37,7 @@ describe('String tokenizer', function() {
    \t     files \t
         }
       \t\t\t`);
-      expect(result).to.eql(['{', 'files', '}'])
+      expect(result).to.eql(['{', 'files', '}']);
     });
 
     it('Handles a really funky (but legitimate) string', function() {
@@ -46,7 +46,37 @@ describe('String tokenizer', function() {
  \r\n\t   files \r\n
         }
       \r\t\r`);
-      expect(result).to.eql(['{', 'files', '}'])
+      expect(result).to.eql(['{', 'files', '}']);
+    });
+
+    it('Handles a query that hates whitespace', function() {
+      const result = tokenizer.tokenize(`{files}`, true);
+      expect(result).to.eql(['{', 'files', '}']);
+    });
+  });
+
+  describe('Arguments', function() {
+    it('Handles scalar arguments', function() {
+      const result = tokenizer.tokenize(`
+      {
+        files(name: "derp")
+      }`);
+      expect(result).to.eql(['{', 'files', '(', 'name', ':', '"', 'derp', '"', ')', '}']);
+    });
+
+    it('Handles complex arguments', function() {
+      const result = tokenizer.tokenize(`
+      {
+        files(name: "derp") {
+          extension
+        }
+      }`);
+      expect(result).to.eql(['{', 'files', '(', 'name', ':', '"', 'derp', '"', ')', '{', 'extension', '}', '}']);
+    });
+
+    it('Handles a lack of whitespace around tokens', function() {
+      const result = tokenizer.tokenize(`{files(name:"derp"){extension name}}`, true);
+      expect(result).to.eql(['{', 'files', '(', 'name', ':', '"', 'derp', '"', ')', '{', 'extension', 'name', '}', '}']);
     });
   });
 });
