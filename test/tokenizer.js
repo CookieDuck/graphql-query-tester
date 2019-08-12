@@ -50,7 +50,7 @@ describe('String tokenizer', function() {
     });
 
     it('Handles a query that hates whitespace', function() {
-      const result = tokenizer.tokenize(`{files}`, true);
+      const result = tokenizer.tokenize(`{files}`);
       expect(result).to.eql(['{', 'files', '}']);
     });
   });
@@ -75,7 +75,7 @@ describe('String tokenizer', function() {
     });
 
     it('Handles a lack of whitespace around tokens', function() {
-      const result = tokenizer.tokenize(`{files(name:"derp"){extension name}}`, true);
+      const result = tokenizer.tokenize(`{files(name:"derp"){extension name}}`);
       expect(result).to.eql(['{', 'files', '(', 'name', ':', '"', 'derp', '"', ')', '{', 'extension', 'name', '}', '}']);
     });
   });
