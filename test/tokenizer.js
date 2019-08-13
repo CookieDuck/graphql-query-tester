@@ -56,7 +56,67 @@ describe('String tokenizer', function() {
   });
 
   describe('Arguments', function() {
-    it('Handles scalar arguments', function() {
+    describe('parsing types', function(){
+      it('int', function() {
+        const result = tokenizer.tokenize(`
+        {
+          files(limit: 3)
+        }`);
+        expect(result).to.eql(['{', 'files', '(', 'limit', ':', '3', ')', '}']);
+      });
+
+      it('float', function() {
+        const result = tokenizer.tokenize(`
+        {
+          files(coolnessThreshold: 2.4)
+        }`);
+        expect(result).to.eql(['{', 'files', '(', 'coolnessThreshold', ':', '2.4', ')', '}']);
+      });
+
+      it('string', function() {
+        const result = tokenizer.tokenize(`
+        {
+          files(extension: "txt")
+        }`);
+        expect(result).to.eql(['{', 'files', '(', 'extension', ':', '"', 'txt', '"', ')', '}']);
+      });
+
+      it('enum', function() {
+        const result = tokenizer.tokenize(`
+        {
+          files(encoding: UTF_8)
+        }`);
+        expect(result).to.eql(['{', 'files', '(', 'encoding', ':', 'UTF_8', ')', '}']);
+      });
+
+      it('Handles multiple arguments on a field', function() {
+        const result = tokenizer.tokenize(`
+        {
+          files(limit: 3, encoding: UTF_8, extension: "txt", coolnessThreshold: 2.4)
+        }`);
+        expect(result).to.eql(['{', 'files', '(',
+          'limit', ':', '3', ',',
+          'encoding', ':', 'UTF_8', ',',
+          'extension', ':', '"', 'txt', '"', ',',
+          'coolnessThreshold', ':', '2.4',
+          ')', '}']
+        );
+      });
+
+      it('multiple arguments and a lack of whitespace', function() {
+        const result = tokenizer.tokenize(`
+        {files(limit:3,encoding:UTF_8,extension:"txt",coolnessThreshold:2.4)}`);
+        expect(result).to.eql(['{', 'files', '(',
+          'limit', ':', '3', ',',
+          'encoding', ':', 'UTF_8', ',',
+          'extension', ':', '"', 'txt', '"', ',',
+          'coolnessThreshold', ':', '2.4',
+          ')', '}']
+        );
+      });
+    });
+
+    it('Handles arguments on scalar fields', function() {
       const result = tokenizer.tokenize(`
       {
         files(name: "derp")
@@ -64,7 +124,7 @@ describe('String tokenizer', function() {
       expect(result).to.eql(['{', 'files', '(', 'name', ':', '"', 'derp', '"', ')', '}']);
     });
 
-    it('Handles complex arguments', function() {
+    it('Handles arguments on complex fields', function() {
       const result = tokenizer.tokenize(`
       {
         files(name: "derp") {
