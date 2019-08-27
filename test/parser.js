@@ -32,8 +32,7 @@ describe('Parser for lexed tokens', function() {
           name
           extension
         }
-      }
-      `;
+      }`;
       const expected = root(
         complex('images',
           scalar('name'),
@@ -63,8 +62,7 @@ describe('Parser for lexed tokens', function() {
             extension
           }
         }
-      }
-      `;
+      }`;
       const expected = root(
         complex('images',
           scalar('name'),
@@ -127,25 +125,155 @@ describe('Parser for lexed tokens', function() {
       const result2 = parser.parse(graphql2);
       expect(result2).to.eql(expected);
     });
+
+    describe('Arguments', function() {
+      describe('Types', function() {
+        it('Int', function() {
+          const graphql = '{ files(limit: 3) }';
+          const expected = root(
+            scalarWithArgs('files',
+              arg( 'limit', '3', 'int'),
+            ),
+          );
+          expect(parser.parse(graphql)).to.deep.equalInAnyOrder(expected);
+        });
+
+        it('Float', function() {
+          const graphql = '{ files(coolnessThreshold: 2.4) }';
+          const expected = root(
+            scalarWithArgs('files',
+              arg( 'coolnessThreshold', '2.4', 'float'),
+            ),
+          );
+          expect(parser.parse(graphql)).to.deep.equalInAnyOrder(expected);
+        });
+
+        it('Enum', function() {
+          const graphql = '{ files(encoding: UTF_8) }';
+          const expected = root(
+            scalarWithArgs('files',
+              arg( 'encoding', 'UTF_8', 'enum'),
+            ),
+          );
+          expect(parser.parse(graphql)).to.deep.equalInAnyOrder(expected);
+        });
+
+        it('String', function() {
+          const graphql = '{ files(extension: "txt") }';
+          const expected = root(
+            scalarWithArgs('files',
+              arg( 'extension', 'txt', 'string'),
+            ),
+          );
+          expect(parser.parse(graphql)).to.deep.equalInAnyOrder(expected);
+        });
+      });
+
+      it('can parse single argument on a scalar field', function() {
+        const graphql = `
+        {
+          images {
+            name(startsWith: "img")
+          }
+        }`;
+        const expected = root(
+          complex('images',
+            scalarWithArgs('name',
+              arg('startsWith', 'img', 'string')),
+          ),
+        );
+
+        const result = parser.parse(graphql);
+        expect(result).to.deep.equalInAnyOrder(expected);
+      });
+
+      it('can parse multiple arguments on a scalar field', function() {
+        const graphql = '{ files(extension: "txt", limit: 3, fileEncoding: UTF_8) }';
+        const expected = root(
+          scalarWithArgs('files',
+            arg( 'extension', 'txt', 'string'),
+            arg( 'limit', '3', 'int'),
+            arg( 'fileEncoding', 'UTF_8', 'enum'),
+          ),
+        );
+        expect(parser.parse(graphql)).to.deep.equalInAnyOrder(expected);
+      });
+
+      it('can parse single argument on a complex field', function() {
+        const graphql = `
+        {
+          images(type: "jpg") {
+            name
+          }
+        }`;
+        const expected = root(
+          complexWithArgs('images',
+            [arg('type', 'jpg', 'string')],
+            scalar('name'),
+          ),
+        );
+
+        const result = parser.parse(graphql);
+        expect(result).to.deep.equalInAnyOrder(expected);
+      });
+
+      it('can parse multiple arguments on a complex field', function() {
+        const graphql = `
+        {
+          files(extension: "txt", limit: 3, fileEncoding: UTF_8) {
+            name
+          }
+        }`;
+        const expected = root(
+          complexWithArgs('files',
+            [
+              arg( 'extension', 'txt', 'string'),
+              arg( 'limit', '3', 'int'),
+              arg( 'fileEncoding', 'UTF_8', 'enum'),
+            ],
+            scalar('name')
+          ),
+        );
+        expect(parser.parse(graphql)).to.deep.equalInAnyOrder(expected);
+      });
+    });
   });
 });
 
 // Helper functions
-const complex = function(value, ...children) {
+const arg = function(name, value, type) {
+  return {
+    name,
+    value,
+    type,
+  };
+};
+
+const scalarWithArgs = function(value, ...arguments) {
+  return {
+    'type': dict.FIELD_SCALAR,
+    'value': value,
+    'arguments': arguments,
+  };
+};
+
+const scalar = function(value) {
+  return scalarWithArgs(value)
+};
+
+const complexWithArgs = function(value, arguments = [], ...children) {
   return {
     'type': dict.FIELD_COMPLEX,
     'value': value,
+    'arguments': arguments,
     'children': children,
   };
 };
 
-const root = function(...children) {
-  return complex('root', ...children);
+const complex = function(value, ...children) {
+  return complexWithArgs(value, [], ...children);
 };
 
-const scalar = function(value) {
-  return {
-    'type': dict.FIELD_SCALAR,
-    'value': value,
-  };
+const root = function(...children) {
+  return complex('root', ...children);
 };

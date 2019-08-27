@@ -162,6 +162,32 @@ describe('Lexer for tokens', function() {
         dict.GROUP_END,
       ]);
     });
+
+    it('Handles all sorts of multiple arguments on a scalar field', function() {
+      const graphql = '{ files(extension: "txt", limit: 3, fileEncoding: UTF_8) }';
+      const result = lexer.lex(tokenizer.tokenize(graphql));
+      const definitions = result.map((item) => item.definition);
+      expect(definitions).to.eql([
+        dict.GROUP_START,
+        dict.FIELD_SCALAR,
+        dict.ARGUMENT_START,
+        dict.ARGUMENT_NAME,
+        dict.COLON,
+        dict.QUOTES,
+        dict.ARGUMENT_VALUE,
+        dict.QUOTES,
+        dict.COMMA,
+        dict.ARGUMENT_NAME,
+        dict.COLON,
+        dict.ARGUMENT_VALUE,
+        dict.COMMA,
+        dict.ARGUMENT_NAME,
+        dict.COLON,
+        dict.ARGUMENT_VALUE,
+        dict.ARGUMENT_END,
+        dict.GROUP_END,
+      ]);
+    });
   });
 
   describe('Lexing errors', function() {
