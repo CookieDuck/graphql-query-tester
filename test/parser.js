@@ -238,6 +238,20 @@ describe('Parser for lexed tokens', function() {
       });
     });
   });
+
+  describe('Sad path', function() {
+    describe('Lexing errors', function() {
+      describe('Returns object with error', function() {
+        it('When too many open curly braces', function() {
+          expect(parser.parse('{ bad { }').error).to.equal("Syntax error: Found 2 '{' but only 1 '}'");
+        });
+
+        it('When too many close curly braces', function() {
+          expect(parser.parse('{ bad { } } }').error).to.equal("Syntax error: Found 3 '}' but only 2 '{'");
+        });
+      });
+    });
+  });
 });
 
 // Helper functions

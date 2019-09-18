@@ -191,17 +191,17 @@ describe('Lexer for tokens', function() {
   });
 
   describe('Lexing errors', function() {
-    describe('Uneven curly braces', function() {
-      it('Too many open curly braces', function() {
+    describe('Throws Syntax error', function() {
+      it('When too many open curly braces', function() {
         const tokens = tokenizer.tokenize('{ bad { }');
 
-        expect(() => lexer.lex(tokens, true)).to.throw("Syntax error: Found 2 '{' but only 1 '}'");
+        expect(() => lexer.lex(tokens)).to.throw("Syntax error: Found 2 '{' but only 1 '}'");
       });
 
-      it('Too many close curly braces', function() {
+      it('When too many close curly braces', function() {
         const tokens = tokenizer.tokenize('{ bad { } } }');
 
-        expect(() => lexer.lex(tokens, true)).to.throw("Syntax error: Found 3 '}' but only 2 '{'");
+        expect(() => lexer.lex(tokens)).to.throw("Syntax error: Found 3 '}' but only 2 '{'");
       });
     });
   });
