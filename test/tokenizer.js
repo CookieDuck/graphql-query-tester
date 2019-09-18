@@ -139,4 +139,133 @@ describe('String tokenizer', function() {
       expect(result).to.eql(['{', 'files', '(', 'name', ':', '"', 'derp', '"', ')', '{', 'extension', 'name', '}', '}']);
     });
   });
+
+  describe('Fragments', function() {
+    describe('Normal', function() {
+      it('handles simple', function() {
+        const result = tokenizer.tokenize(`
+        {
+          files(name: "derp") {
+            ...fileFields
+          }
+        }
+        
+        fragment fileFields on ProjectFiles {
+          type
+          name
+        }`);
+
+        expect(result).to.eql([
+          '{', 'files', '(', 'name', ':', '"', 'derp', '"', ')', '{',
+          '...', 'fileFields', '}', '}',
+          'fragment', 'fileFields', 'on', 'ProjectFiles', '{',
+          'type',
+          'name', '}'
+        ]);
+      });
+
+      it('handles complex', function() {
+        const result = tokenizer.tokenize(`
+        {
+          files(name: "derp") {
+            ...fileFields
+          }
+        }
+        
+        fragment fileFields on ProjectFiles {
+          type
+          name
+          extension
+          authors {
+            firstName
+            lastName
+          }
+        }`);
+
+        expect(result).to.eql([
+          '{', 'files', '(', 'name', ':', '"', 'derp', '"', ')', '{',
+          '...', 'fileFields', '}', '}',
+          'fragment', 'fileFields', 'on', 'ProjectFiles', '{',
+          'type',
+          'name',
+          'extension',
+          'authors', '{',
+          'firstName',
+          'lastName', '}', '}'
+        ]);
+      });
+    });
+
+    describe('Inline', function() {
+      it('handles simple', function() {
+        const result = tokenizer.tokenize(`
+        {
+          files(name: "derp") {
+            ... on ImageFile {
+              type
+              name
+            }
+          }
+        }`);
+
+        expect(result).to.eql([
+          '{', 'files', '(', 'name', ':', '"', 'derp', '"', ')', '{',
+          '...', 'on', 'ImageFile', '{',
+          'type',
+          'name', '}', '}', '}'
+        ]);
+      });
+
+      it('handles complex', function() {
+        const result = tokenizer.tokenize(`
+        {
+          files(name: "derp") {
+            ... on ImageFile {
+              type
+              author {
+                firstName
+                lastName
+              }
+            }
+          }
+        }`);
+
+        expect(result).to.eql([
+          '{', 'files', '(', 'name', ':', '"', 'derp', '"', ')', '{',
+          '...', 'on', 'ImageFile', '{',
+          'type',
+          'author', '{',
+          'firstName',
+          'lastName', '}', '}', '}', '}'
+        ]);
+      });
+
+      it('handles multiple', function() {
+        const result = tokenizer.tokenize(`
+        {
+          files(name: "derp") {
+            ... on ImageFile {
+              type
+              name
+            }
+            ... on TextFile {
+              type
+              extension
+            }
+          }
+        }`);
+
+        expect(result).to.eql([
+          '{', 'files', '(', 'name', ':', '"', 'derp', '"', ')', '{',
+          '...', 'on', 'ImageFile', '{',
+          'type',
+          'name',
+          '}',
+          '...', 'on', 'TextFile', '{',
+          'type',
+          'extension', '}', '}', '}'
+        ]);
+      });
+    });
+  });
 });
