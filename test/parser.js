@@ -231,10 +231,307 @@ describe('Parser for lexed tokens', function() {
               arg( 'limit', '3', 'int'),
               arg( 'fileEncoding', 'UTF_8', 'enum'),
             ],
-            scalar('name')
+            scalar('name'),
           ),
         );
         expect(parser.parse(graphql)).to.deep.equalInAnyOrder(expected);
+      });
+    });
+
+    describe('Fragments', function() {
+      describe('Normal', function() {
+        it('handles declaration of simple fragment', function() {
+          const graphql = `
+          {
+            files(name: "derp") {
+              ...fileFields
+            }
+          }
+
+          fragment fileFields on ProjectFiles {
+            type
+            name
+          }`;
+
+          const expected = rootWithFragments(
+            [
+              fragmentDeclaration('fileFields', 'ProjectFiles',
+                scalar('type'),
+                scalar('name'),
+              ),
+            ],
+            complexWithArgs('files',
+              [
+                arg('name', 'derp', 'string'),
+              ],
+              fragment('fileFields'),
+            ),
+          );
+
+          const result = parser.parse(graphql);
+          expect(result).to.deep.equalInAnyOrder(expected);
+        });
+
+        it('handles declaration of complex fragment', function() {
+          const graphql = `{
+            files(name: "derp") {
+              ...fileFields
+            }
+          }
+
+          fragment fileFields on ProjectFiles {
+            author {
+              firstName
+              lastName
+              address {
+                line1
+                zip
+              }
+            }
+            name
+          }`;
+
+          const expected = rootWithFragments(
+            [
+              fragmentDeclaration('fileFields', 'ProjectFiles',
+                complex('author',
+                  scalar('firstName'),
+                  scalar('lastName'),
+                  complex('address',
+                    scalar('line1'),
+                    scalar('zip'),
+                  ),
+                ),
+                scalar('name'),
+              ),
+            ],
+            complexWithArgs('files',
+              [
+                arg('name', 'derp', 'string'),
+              ],
+              fragment('fileFields'),
+            ),
+          );
+
+          const result = parser.parse(graphql);
+          expect(result).to.deep.equalInAnyOrder(expected);
+        });
+
+        it('handles multiple declarations', function() {
+          const graphql = `{
+            files(name: "derp") {
+              ...fileFields
+            }
+            people {
+              ...person
+            }
+          }
+
+          fragment fileFields on ProjectFiles {
+            author {
+              firstName
+              lastName
+              address {
+                line1
+                zip
+              }
+            }
+            name
+          }
+
+          fragment person on Person {
+            firstName
+            lastName
+          }`;
+
+          const expected = rootWithFragments(
+            [
+              fragmentDeclaration('fileFields', 'ProjectFiles',
+                complex('author',
+                  scalar('firstName'),
+                  scalar('lastName'),
+                  complex('address',
+                    scalar('line1'),
+                    scalar('zip'),
+                  ),
+                ),
+                scalar('name'),
+              ),
+              fragmentDeclaration('person', 'Person',
+                scalar('firstName'),
+                scalar('lastName'),
+              ),
+            ],
+            complexWithArgs('files',
+              [
+                arg('name', 'derp', 'string'),
+              ],
+              fragment('fileFields'),
+            ),
+            complex('people',
+              fragment('person'),
+            ),
+          );
+
+          const result = parser.parse(graphql);
+          expect(result).to.deep.equalInAnyOrder(expected);
+        });
+      });
+
+      describe('Inline', function() {
+        it('handles single', function() {
+          const graphql = `
+          {
+            files(name: "derp") {
+              ... on ImageFile {
+                type
+                name
+              }
+            }
+          }`;
+
+          const expected = root(
+            complexWithArgs('files',
+              [
+                arg('name', 'derp', 'string'),
+              ],
+              inlineFragment('ImageFile',
+                scalar('type'),
+                scalar('name'),
+              ),
+            ),
+          );
+          const result = parser.parse(graphql);
+          expect(result).to.deep.equalInAnyOrder(expected);
+        });
+
+        it('handles multiple', function() {
+          const graphql = `
+          {
+            files {
+              ... on ImageFile {
+                type
+                name
+              }
+              ... on TextFile {
+                name
+                author {
+                  firstName
+                  lastName
+                }
+              }
+            }
+          }`;
+
+          const expected = root(
+            complex('files',
+              inlineFragment('ImageFile',
+                scalar('type'),
+                scalar('name'),
+              ),
+              inlineFragment('TextFile',
+                scalar('name'),
+                complex('author',
+                  scalar('firstName'),
+                  scalar('lastName'),
+                ),
+              ),
+            ),
+          );
+          const result = parser.parse(graphql);
+          expect(result).to.deep.equalInAnyOrder(expected);
+        });
+      });
+
+      describe('Errors', function() {
+        it('returns error when a fragment is declared but is not used', function() {
+          const graphql = `
+          {
+            files(name: "derp") {
+              type
+            }
+          }
+
+          fragment fileFields on ProjectFiles {
+            author {
+              firstName
+              lastName
+            }
+            name
+          }`;
+
+          const expectedError = "Syntax error: Fragment 'fileFields' is declared, but never used";
+          const error = parser.parse(graphql).error;
+          expect(error).to.equal(expectedError);
+        });
+
+        describe('Fragment declaration errors', function() {
+          const expectedError = "Syntax error: Fragment 'fileFields' has no definition.  Available fragment definitions: []";
+
+          it('when "fragment" keyword is not the first word', function () {
+            const graphql = `
+            {
+              files {
+                ...fileFields
+              }
+            }
+
+            fileFields fragment on ProjectFiles {
+              type
+              name
+            }`;
+            const error = parser.parse(graphql).error;
+            expect(error).to.equal(expectedError);
+          });
+
+          it('when fragment variable name is not between "fragment" and "on"', function() {
+            const graphql = `
+            {
+              files {
+                ...fileFields
+              }
+            }
+
+            fragment on fileFields ProjectFiles {
+              type
+              name
+            }`;
+            const error = parser.parse(graphql).error;
+            expect(error).to.equal(expectedError);
+          });
+
+          it('when "on" keyword is not between name and type', function() {
+            const graphql = `
+            {
+              files {
+                ...fileFields
+              }
+            }
+
+            on fragment fileFields ProjectFiles {
+              type
+              name
+            }`;
+            const error = parser.parse(graphql).error;
+            expect(error).to.equal(expectedError);
+          });
+
+          it('when type is not between "on" and "{"', function() {
+            const graphql = `
+            {
+              files {
+                ...fileFields
+              }
+            }
+
+            fragment fileFields ProjectFiles on {
+              type
+              name
+            }`;
+            const error = parser.parse(graphql).error;
+            expect(error).to.equal(expectedError);
+          });
+        });
       });
     });
   });
@@ -265,9 +562,9 @@ const arg = function(name, value, type) {
 
 const scalarWithArgs = function(value, ...arguments) {
   return {
-    'type': dict.FIELD_SCALAR,
-    'value': value,
-    'arguments': arguments,
+    type: dict.FIELD_SCALAR,
+    value,
+    arguments,
   };
 };
 
@@ -277,10 +574,10 @@ const scalar = function(value) {
 
 const complexWithArgs = function(value, arguments = [], ...children) {
   return {
-    'type': dict.FIELD_COMPLEX,
-    'value': value,
-    'arguments': arguments,
-    'children': children,
+    type: dict.FIELD_COMPLEX,
+    value,
+    arguments,
+    children,
   };
 };
 
@@ -288,6 +585,38 @@ const complex = function(value, ...children) {
   return complexWithArgs(value, [], ...children);
 };
 
+const fragment = function(value) {
+  return {
+    type: dict.FRAGMENT_NAME,
+    value,
+  };
+};
+
+const inlineFragment = function(value, ...children) {
+  return {
+    type: dict.INLINE_FRAGMENT,
+    value,
+    children,
+  };
+};
+
+const fragmentDeclaration = function(value, typeReference, ...children) {
+  return {
+    type: dict.FRAGMENT_DECLARATION,
+    value,
+    typeReference,
+    children
+  };
+};
+
 const root = function(...children) {
-  return complex('root', ...children);
+  const root = complex('root', ...children);
+  root['fragments'] = [];
+  return root;
+};
+
+const rootWithFragments = function(fragmentArray, ...children) {
+  const rootNode = root(...children);
+  rootNode['fragments'] = fragmentArray;
+  return rootNode;
 };
