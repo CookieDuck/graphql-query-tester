@@ -25,5 +25,8 @@
     "chai": "4.2.0",
     "deep-equal-in-any-order": "1.0.16",
     "mocha": "6.2.0"
+  },
+  "dependencies": {
+    "ramda": "^0.26.1"
   }
 }

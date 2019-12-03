@@ -134,6 +134,36 @@ describe('String tokenizer', function() {
       expect(result).to.eql(['{', 'files', '(', 'name', ':', '"', 'derp', '"', ')', '{', 'extension', '}', '}']);
     });
 
+    it('Handles arguments that have token characters inside', function() {
+      const specialCharacterArgument = '... , \\"{( : )}\\"';
+      const result = tokenizer.tokenize(`
+      {
+        files(timestamp: "${specialCharacterArgument}") {
+          extension
+        }
+      }`);
+      expect(result).to.eql(['{', 'files', '(',
+        'timestamp', ':', '"', specialCharacterArgument,
+        '"', ')', '{', 'extension', '}', '}']);
+    });
+
+    it('Handles multiple string arguments', function() {
+      const result = tokenizer.tokenize(`
+      {
+        files(name:"derp",type:"txt") {
+          author(firstName:"jimenez") {
+            lastName
+          }
+        }
+      }`);
+      expect(result).to.eql(['{', 'files', '(',
+        'name', ':', '"', 'derp', '"', ',',
+        'type', ':', '"', 'txt', '"',
+        ')', '{', 'author', '(',
+        'firstName', ':', '"', 'jimenez', '"',
+        ')', '{', 'lastName', '}', '}', '}']);
+    });
+
     it('Handles a lack of whitespace around tokens', function() {
       const result = tokenizer.tokenize(`{files(name:"derp"){extension name}}`);
       expect(result).to.eql(['{', 'files', '(', 'name', ':', '"', 'derp', '"', ')', '{', 'extension', 'name', '}', '}']);
