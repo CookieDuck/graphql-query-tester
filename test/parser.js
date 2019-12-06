@@ -483,6 +483,52 @@ describe('Parser for lexed tokens', function() {
         });
       });
 
+      it('Handles Fragment within a Fragment', function() {
+        const graphql = `
+        {
+          files(limit: 20) {
+            ... Files
+          }
+        }
+
+        fragment Person on PersonType {
+          firstName
+          lastName
+        }
+
+        fragment Files on FileType {
+          name
+          type
+          author {
+            ... Person
+          }
+        }
+        `;
+
+        const expected = rootWithFragments(
+          [
+            fragmentDeclaration('Person', 'PersonType',
+              scalar('firstName'),
+              scalar('lastName'),
+            ),
+            fragmentDeclaration('Files', 'FileType',
+              scalar('name'),
+              scalar('type'),
+              complex('author',
+                fragment('Person'),
+              ),
+            ),
+          ],
+          complexWithArgs('files', [
+              arg('limit', '20', 'int'),
+            ],
+            fragment('Files'),
+          ),
+        );
+        const result = parser.parse(graphql);
+        expect(result).to.deep.equalInAnyOrder(expected);
+      });
+
       describe('Errors', function() {
         it('returns error when a fragment is declared but is not used', function() {
           const graphql = `

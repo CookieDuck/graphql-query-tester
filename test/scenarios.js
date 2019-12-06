@@ -11,7 +11,10 @@ const {
   complexWithArgs,
   complex,
   inlineFragment,
+  fragmentDeclaration,
+  fragment,
   root,
+  rootWithFragments,
 } = util;
 
 describe('complex scenarios', function() {
@@ -109,6 +112,104 @@ describe('complex scenarios', function() {
               scalar('departing'),
               scalar('arriving'),
             ),
+          ),
+        ),
+      ),
+    );
+    const result = parser.parse(graphql);
+    expect(result).to.deep.equalInAnyOrder(expected);
+  });
+
+  it('sports franchises with fragments', function() {
+    const league = 'nhl';
+    const teamName = 'Avalanche';
+    const graphql = `
+    {
+      sport(league: "${league}") {
+        franchise(name: "${teamName}") {
+          ... TeamInfo
+          rivals {
+            ... TeamInfo
+          }
+        }
+      }
+    }
+
+    fragment Person on Roster {
+      firstName
+      lastName
+      imageUrl
+    }
+
+    fragment Record on TeamRecord {
+      wins
+      losses
+      ties
+    }
+
+    fragment Logo on Image {
+      imageUrl
+      primaryColor
+      secondaryColor
+      aspectRatio
+    }
+
+    fragment TeamInfo on Franchise {
+      name
+      description
+      roster {
+        ... Person
+      }
+      logo {
+        ... Logo
+      }
+      record {
+        ... Record
+      }
+    }
+    `;
+
+    const expected = rootWithFragments(
+      [
+        fragmentDeclaration('Person', 'Roster',
+          scalar('firstName'),
+          scalar('lastName'),
+          scalar('imageUrl'),
+        ),
+        fragmentDeclaration('Record', 'TeamRecord',
+          scalar('wins'),
+          scalar('losses'),
+          scalar('ties'),
+        ),
+        fragmentDeclaration('Logo', 'Image',
+          scalar('imageUrl'),
+          scalar('primaryColor'),
+          scalar('secondaryColor'),
+          scalar('aspectRatio'),
+        ),
+        fragmentDeclaration('TeamInfo', 'Franchise',
+          scalar('name'),
+          scalar('description'),
+          complex('roster',
+            fragment('Person'),
+          ),
+          complex('logo',
+            fragment('Logo'),
+          ),
+          complex('record',
+            fragment('Record'),
+          ),
+        ),
+      ],
+      complexWithArgs('sport', [
+          arg('league', league, 'string'),
+        ],
+        complexWithArgs('franchise', [
+            arg('name', teamName, 'string'),
+          ],
+          fragment('TeamInfo'),
+          complex('rivals',
+            fragment('TeamInfo'),
           ),
         ),
       ),
