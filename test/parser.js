@@ -4,19 +4,17 @@ chai.use(deepEqualInAnyOrder);
 const { expect } = chai;
 
 const parser = require('../lib/parser');
-const util = require('./testUtility');
+
 const {
-  arg,
-  scalarWithArgs,
-  scalar,
-  complexWithArgs,
-  complex,
+  argument,
+  leaf,
+  branchWithArguments,
+  branch,
   fragment,
   inlineFragment,
   fragmentDeclaration,
-  root,
-  rootWithFragments,
-} = util;
+  query,
+} = require('../lib/structure');
 
 describe('Parser for lexed tokens', function() {
   describe('Happy path', function() {
@@ -27,10 +25,10 @@ describe('Parser for lexed tokens', function() {
         images
         users
       }`;
-      const expected = root(
-        scalar('files'),
-        scalar('images'),
-        scalar('users'),
+      const expected = query(
+        leaf('files'),
+        leaf('images'),
+        leaf('users'),
       );
 
       const result = parser.parse(graphql);
@@ -45,10 +43,10 @@ describe('Parser for lexed tokens', function() {
           extension
         }
       }`;
-      const expected = root(
-        complex('images',
-          scalar('name'),
-          scalar('extension'),
+      const expected = query(
+        branch('images',
+          leaf('name'),
+          leaf('extension'),
         ),
       );
 
@@ -75,20 +73,20 @@ describe('Parser for lexed tokens', function() {
           }
         }
       }`;
-      const expected = root(
-        complex('images',
-          scalar('name'),
-          scalar('extension'),
+      const expected = query(
+        branch('images',
+          leaf('name'),
+          leaf('extension'),
         ),
-        scalar('users'),
-        complex('resources',
-          complex('files',
-            scalar('name'),
-            scalar('extension'),
+        leaf('users'),
+        branch('resources',
+          branch('files',
+            leaf('name'),
+            leaf('extension'),
           ),
-          complex('images',
-            scalar('name'),
-            scalar('extension'),
+          branch('images',
+            leaf('name'),
+            leaf('extension'),
           ),
         ),
       );
@@ -120,13 +118,13 @@ describe('Parser for lexed tokens', function() {
         a
         b
       }`;
-      const expected = root(
-        scalar('a'),
-        scalar('b'),
-        complex('c',
-          scalar('d'),
-          complex('e',
-            scalar('f'),
+      const expected = query(
+        leaf('a'),
+        leaf('b'),
+        branch('c',
+          leaf('d'),
+          branch('e',
+            leaf('f'),
           ),
         ),
       );
@@ -142,9 +140,9 @@ describe('Parser for lexed tokens', function() {
       describe('Types', function() {
         it('Int', function() {
           const graphql = '{ files(limit: 3) }';
-          const expected = root(
-            scalarWithArgs('files',
-              arg( 'limit', '3', 'int'),
+          const expected = query(
+            leaf('files',
+              argument( 'limit', '3', false),
             ),
           );
           expect(parser.parse(graphql)).to.deep.equalInAnyOrder(expected);
@@ -152,9 +150,9 @@ describe('Parser for lexed tokens', function() {
 
         it('Float', function() {
           const graphql = '{ files(coolnessThreshold: 2.4) }';
-          const expected = root(
-            scalarWithArgs('files',
-              arg( 'coolnessThreshold', '2.4', 'float'),
+          const expected = query(
+            leaf('files',
+              argument( 'coolnessThreshold', '2.4', false),
             ),
           );
           expect(parser.parse(graphql)).to.deep.equalInAnyOrder(expected);
@@ -162,9 +160,9 @@ describe('Parser for lexed tokens', function() {
 
         it('Enum', function() {
           const graphql = '{ files(encoding: UTF_8) }';
-          const expected = root(
-            scalarWithArgs('files',
-              arg( 'encoding', 'UTF_8', 'enum'),
+          const expected = query(
+            leaf('files',
+              argument( 'encoding', 'UTF_8', false),
             ),
           );
           expect(parser.parse(graphql)).to.deep.equalInAnyOrder(expected);
@@ -172,26 +170,27 @@ describe('Parser for lexed tokens', function() {
 
         it('String', function() {
           const graphql = '{ files(extension: "txt") }';
-          const expected = root(
-            scalarWithArgs('files',
-              arg( 'extension', 'txt', 'string'),
+          const expected = query(
+            leaf('files',
+              argument( 'extension', 'txt', true),
             ),
           );
           expect(parser.parse(graphql)).to.deep.equalInAnyOrder(expected);
         });
       });
 
-      it('can parse single argument on a scalar field', function() {
+      it('can parse single argument on a leaf field', function() {
         const graphql = `
         {
           images {
             name(startsWith: "img")
           }
         }`;
-        const expected = root(
-          complex('images',
-            scalarWithArgs('name',
-              arg('startsWith', 'img', 'string')),
+        const expected = query(
+          branch('images',
+            leaf('name',
+              argument('startsWith', 'img', true),
+            ),
           ),
         );
 
@@ -199,13 +198,13 @@ describe('Parser for lexed tokens', function() {
         expect(result).to.deep.equalInAnyOrder(expected);
       });
 
-      it('can parse multiple arguments on a scalar field', function() {
+      it('can parse multiple arguments on a leaf field', function() {
         const graphql = '{ files(extension: "txt", limit: 3, fileEncoding: UTF_8) }';
-        const expected = root(
-          scalarWithArgs('files',
-            arg( 'extension', 'txt', 'string'),
-            arg( 'limit', '3', 'int'),
-            arg( 'fileEncoding', 'UTF_8', 'enum'),
+        const expected = query(
+          leaf('files',
+            argument( 'extension', 'txt', true),
+            argument( 'limit', '3', false),
+            argument( 'fileEncoding', 'UTF_8', false),
           ),
         );
         expect(parser.parse(graphql)).to.deep.equalInAnyOrder(expected);
@@ -218,10 +217,10 @@ describe('Parser for lexed tokens', function() {
             name
           }
         }`;
-        const expected = root(
-          complexWithArgs('images',
-            [arg('type', 'jpg', 'string')],
-            scalar('name'),
+        const expected = query(
+          branchWithArguments('images',
+            [argument('type', 'jpg', true)],
+            leaf('name'),
           ),
         );
 
@@ -236,14 +235,14 @@ describe('Parser for lexed tokens', function() {
             name
           }
         }`;
-        const expected = root(
-          complexWithArgs('files',
+        const expected = query(
+          branchWithArguments('files',
             [
-              arg( 'extension', 'txt', 'string'),
-              arg( 'limit', '3', 'int'),
-              arg( 'fileEncoding', 'UTF_8', 'enum'),
+              argument( 'extension', 'txt', true),
+              argument( 'limit', '3', false),
+              argument( 'fileEncoding', 'UTF_8', false),
             ],
-            scalar('name'),
+            leaf('name'),
           ),
         );
         expect(parser.parse(graphql)).to.deep.equalInAnyOrder(expected);
@@ -260,16 +259,16 @@ describe('Parser for lexed tokens', function() {
           }
         }`;
 
-        const expected = root(
-          complexWithArgs('files', [
-              arg('extension', 'txt', 'string'),
+        const expected = query(
+          branchWithArguments('files', [
+              argument('extension', 'txt', true),
             ],
-            scalar('name'),
-            complexWithArgs('author', [
-                arg('name', 'timmy', 'string'),
-                arg('limit', '3', 'int'),
+            leaf('name'),
+            branchWithArguments('author', [
+                argument('name', 'timmy', true),
+                argument('limit', '3', false),
               ],
-              scalar('lastName',),
+              leaf('lastName',),
             ),
           ),
         );
@@ -293,18 +292,16 @@ describe('Parser for lexed tokens', function() {
             name
           }`;
 
-          const expected = rootWithFragments(
-            [
-              fragmentDeclaration('fileFields', 'ProjectFiles',
-                scalar('type'),
-                scalar('name'),
-              ),
-            ],
-            complexWithArgs('files',
+          const expected = query(
+            branchWithArguments('files',
               [
-                arg('name', 'derp', 'string'),
+                argument('name', 'derp', true),
               ],
               fragment('fileFields'),
+            ),
+            fragmentDeclaration('fileFields', 'ProjectFiles',
+              leaf('type'),
+              leaf('name'),
             ),
           );
 
@@ -331,25 +328,23 @@ describe('Parser for lexed tokens', function() {
             name
           }`;
 
-          const expected = rootWithFragments(
-            [
-              fragmentDeclaration('fileFields', 'ProjectFiles',
-                complex('author',
-                  scalar('firstName'),
-                  scalar('lastName'),
-                  complex('address',
-                    scalar('line1'),
-                    scalar('zip'),
-                  ),
-                ),
-                scalar('name'),
-              ),
-            ],
-            complexWithArgs('files',
+          const expected = query(
+            branchWithArguments('files',
               [
-                arg('name', 'derp', 'string'),
+                argument('name', 'derp', true),
               ],
               fragment('fileFields'),
+            ),
+            fragmentDeclaration('fileFields', 'ProjectFiles',
+              branch('author',
+                leaf('firstName'),
+                leaf('lastName'),
+                branch('address',
+                  leaf('line1'),
+                  leaf('zip'),
+                ),
+              ),
+              leaf('name'),
             ),
           );
 
@@ -384,32 +379,30 @@ describe('Parser for lexed tokens', function() {
             lastName
           }`;
 
-          const expected = rootWithFragments(
-            [
-              fragmentDeclaration('fileFields', 'ProjectFiles',
-                complex('author',
-                  scalar('firstName'),
-                  scalar('lastName'),
-                  complex('address',
-                    scalar('line1'),
-                    scalar('zip'),
-                  ),
-                ),
-                scalar('name'),
-              ),
-              fragmentDeclaration('person', 'Person',
-                scalar('firstName'),
-                scalar('lastName'),
-              ),
-            ],
-            complexWithArgs('files',
+          const expected = query(
+            branchWithArguments('files',
               [
-                arg('name', 'derp', 'string'),
+                argument('name', 'derp', true),
               ],
               fragment('fileFields'),
             ),
-            complex('people',
+            branch('people',
               fragment('person'),
+            ),
+            fragmentDeclaration('fileFields', 'ProjectFiles',
+              branch('author',
+                leaf('firstName'),
+                leaf('lastName'),
+                branch('address',
+                  leaf('line1'),
+                  leaf('zip'),
+                ),
+              ),
+              leaf('name'),
+            ),
+            fragmentDeclaration('person', 'Person',
+              leaf('firstName'),
+              leaf('lastName'),
             ),
           );
 
@@ -430,14 +423,14 @@ describe('Parser for lexed tokens', function() {
             }
           }`;
 
-          const expected = root(
-            complexWithArgs('files',
+          const expected = query(
+            branchWithArguments('files',
               [
-                arg('name', 'derp', 'string'),
+                argument('name', 'derp', true),
               ],
               inlineFragment('ImageFile',
-                scalar('type'),
-                scalar('name'),
+                leaf('type'),
+                leaf('name'),
               ),
             ),
           );
@@ -463,17 +456,17 @@ describe('Parser for lexed tokens', function() {
             }
           }`;
 
-          const expected = root(
-            complex('files',
+          const expected = query(
+            branch('files',
               inlineFragment('ImageFile',
-                scalar('type'),
-                scalar('name'),
+                leaf('type'),
+                leaf('name'),
               ),
               inlineFragment('TextFile',
-                scalar('name'),
-                complex('author',
-                  scalar('firstName'),
-                  scalar('lastName'),
+                leaf('name'),
+                branch('author',
+                  leaf('firstName'),
+                  leaf('lastName'),
                 ),
               ),
             ),
@@ -505,24 +498,22 @@ describe('Parser for lexed tokens', function() {
         }
         `;
 
-        const expected = rootWithFragments(
-          [
-            fragmentDeclaration('Person', 'PersonType',
-              scalar('firstName'),
-              scalar('lastName'),
-            ),
-            fragmentDeclaration('Files', 'FileType',
-              scalar('name'),
-              scalar('type'),
-              complex('author',
-                fragment('Person'),
-              ),
-            ),
-          ],
-          complexWithArgs('files', [
-              arg('limit', '20', 'int'),
+        const expected = query(
+          branchWithArguments('files', [
+              argument('limit', '20', false),
             ],
             fragment('Files'),
+          ),
+          fragmentDeclaration('Person', 'PersonType',
+            leaf('firstName'),
+            leaf('lastName'),
+          ),
+          fragmentDeclaration('Files', 'FileType',
+            leaf('name'),
+            leaf('type'),
+            branch('author',
+              fragment('Person'),
+            ),
           ),
         );
         const result = parser.parse(graphql);

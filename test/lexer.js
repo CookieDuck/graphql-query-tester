@@ -18,9 +18,9 @@ describe('Lexer for tokens', function() {
     const definitions = result.map((item) => item.definition);
     expect(definitions).to.eql([
       dict.GROUP_START,
-      dict.FIELD_COMPLEX,
+      dict.FIELD_BRANCH,
       dict.GROUP_START,
-      dict.FIELD_SCALAR,
+      dict.FIELD_LEAF,
       dict.GROUP_END,
       dict.GROUP_END,
     ]);
@@ -107,7 +107,7 @@ describe('Lexer for tokens', function() {
       const definitions = result.map((item) => item.definition);
       expect(definitions).to.eql([
         dict.GROUP_START,
-        dict.FIELD_SCALAR,
+        dict.FIELD_LEAF,
         dict.ARGUMENT_START,
         dict.ARGUMENT_NAME,
         dict.COLON,
@@ -147,7 +147,7 @@ describe('Lexer for tokens', function() {
       const definitions = result.map((item) => item.definition);
       expect(definitions).to.eql([
         dict.GROUP_START,
-        dict.FIELD_SCALAR,
+        dict.FIELD_LEAF,
         dict.ARGUMENT_START,
         dict.ARGUMENT_NAME,
         dict.COLON,
@@ -169,7 +169,7 @@ describe('Lexer for tokens', function() {
       const definitions = result.map((item) => item.definition);
       expect(definitions).to.eql([
         dict.GROUP_START,
-        dict.FIELD_SCALAR,
+        dict.FIELD_LEAF,
         dict.ARGUMENT_START,
         dict.ARGUMENT_NAME,
         dict.COLON,
@@ -210,7 +210,7 @@ describe('Lexer for tokens', function() {
           const definitions = result.map((item) => item.definition);
           expect(definitions).to.eql([
             dict.GROUP_START,
-            dict.FIELD_COMPLEX,
+            dict.FIELD_BRANCH,
             dict.ARGUMENT_START,
             dict.ARGUMENT_NAME,
             dict.COLON,
@@ -232,8 +232,8 @@ describe('Lexer for tokens', function() {
             dict.FRAGMENT_TYPE_NAME,
 
             dict.GROUP_START,
-            dict.FIELD_SCALAR,
-            dict.FIELD_SCALAR,
+            dict.FIELD_LEAF,
+            dict.FIELD_LEAF,
             dict.GROUP_END,
           ]);
         });
@@ -307,7 +307,7 @@ describe('Lexer for tokens', function() {
           const definitions = result.map((item) => item.definition);
           expect(definitions).to.eql([
             dict.GROUP_START,
-            dict.FIELD_COMPLEX,
+            dict.FIELD_BRANCH,
             dict.ARGUMENT_START,
             dict.ARGUMENT_NAME,
             dict.COLON,
@@ -329,14 +329,14 @@ describe('Lexer for tokens', function() {
             dict.FRAGMENT_TYPE_NAME,
 
             dict.GROUP_START,
-            dict.FIELD_SCALAR,
-            dict.FIELD_SCALAR,
-            dict.FIELD_SCALAR,
+            dict.FIELD_LEAF,
+            dict.FIELD_LEAF,
+            dict.FIELD_LEAF,
 
-            dict.FIELD_COMPLEX,
+            dict.FIELD_BRANCH,
             dict.GROUP_START,
-            dict.FIELD_SCALAR,
-            dict.FIELD_SCALAR,
+            dict.FIELD_LEAF,
+            dict.FIELD_LEAF,
             dict.GROUP_END,
 
             dict.GROUP_END,
@@ -416,7 +416,7 @@ describe('Lexer for tokens', function() {
           const definitions = result.map((item) => item.definition);
           expect(definitions).to.eql([
             dict.GROUP_START,
-            dict.FIELD_COMPLEX,
+            dict.FIELD_BRANCH,
             dict.ARGUMENT_START,
             dict.ARGUMENT_NAME,
             dict.COLON,
@@ -431,8 +431,8 @@ describe('Lexer for tokens', function() {
             dict.FRAGMENT_TYPE_NAME,
 
             dict.GROUP_START,
-            dict.FIELD_SCALAR,
-            dict.FIELD_SCALAR,
+            dict.FIELD_LEAF,
+            dict.FIELD_LEAF,
             dict.GROUP_END,
             dict.GROUP_END,
             dict.GROUP_END,
@@ -470,7 +470,7 @@ describe('Lexer for tokens', function() {
           const definitions = result.map((item) => item.definition);
           expect(definitions).to.eql([
             dict.GROUP_START,
-            dict.FIELD_COMPLEX,
+            dict.FIELD_BRANCH,
             dict.ARGUMENT_START,
             dict.ARGUMENT_NAME,
             dict.COLON,
@@ -485,11 +485,11 @@ describe('Lexer for tokens', function() {
             dict.FRAGMENT_TYPE_NAME,
 
             dict.GROUP_START,
-            dict.FIELD_SCALAR,
-            dict.FIELD_COMPLEX,
+            dict.FIELD_LEAF,
+            dict.FIELD_BRANCH,
             dict.GROUP_START,
-            dict.FIELD_SCALAR,
-            dict.FIELD_SCALAR,
+            dict.FIELD_LEAF,
+            dict.FIELD_LEAF,
             dict.GROUP_END,
             dict.GROUP_END,
             dict.GROUP_END,
@@ -531,7 +531,7 @@ describe('Lexer for tokens', function() {
           const definitions = result.map((item) => item.definition);
           expect(definitions).to.eql([
             dict.GROUP_START,
-            dict.FIELD_COMPLEX,
+            dict.FIELD_BRANCH,
             dict.ARGUMENT_START,
             dict.ARGUMENT_NAME,
             dict.COLON,
@@ -546,8 +546,8 @@ describe('Lexer for tokens', function() {
             dict.FRAGMENT_TYPE_NAME,
             dict.GROUP_START,
 
-            dict.FIELD_SCALAR,
-            dict.FIELD_SCALAR,
+            dict.FIELD_LEAF,
+            dict.FIELD_LEAF,
             dict.GROUP_END,
 
             dict.ELLIPSIS,
@@ -555,8 +555,8 @@ describe('Lexer for tokens', function() {
             dict.FRAGMENT_TYPE_NAME,
             dict.GROUP_START,
 
-            dict.FIELD_SCALAR,
-            dict.FIELD_SCALAR,
+            dict.FIELD_LEAF,
+            dict.FIELD_LEAF,
             dict.GROUP_END,
 
             dict.GROUP_END,
