@@ -201,7 +201,7 @@ describe('Lexer for tokens', function() {
           }
         }
       }`;
-      const result = lexer.lex(tokenizer.tokenize(graphql), true);
+      const result = lexer.lex(tokenizer.tokenize(graphql));
       const definitions = result.map(item => item.definition);
       expect(definitions).to.eql([
         dict.GROUP_START,
