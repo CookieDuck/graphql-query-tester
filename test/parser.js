@@ -95,7 +95,7 @@ describe('Parser for lexed tokens', function() {
       expect(result).to.deep.equalInAnyOrder(expected);
     });
 
-    it('Equivalent queries but in different order produce equivalent ASTs', function() {
+    it('Equivalent queries but in different order produce equivalent ASTs when preserveOrder = false', function() {
       const graphql1 = `
       {
         a
@@ -129,11 +129,71 @@ describe('Parser for lexed tokens', function() {
         ),
       );
 
-      const result1 = parser.parse(graphql1);
+      const options = {
+        preserveOrder: false,
+      };
+      const result1 = parser.parse(graphql1, options);
       expect(result1).to.eql(expected);
 
-      const result2 = parser.parse(graphql2);
+      const result2 = parser.parse(graphql2, options);
       expect(result2).to.eql(expected);
+    });
+
+    it('Equivalent queries in different order produce strictly ordered parsed ASTs when preserveOrder = true', function() {
+      const graphql1 = `
+      {
+        a
+        b
+        c {
+          d
+          e {
+            f
+          }
+        }
+      }`;
+      const expected1 = query(
+        leaf('a'),
+        leaf('b'),
+        branch('c',
+          leaf('d'),
+          branch('e',
+            leaf('f'),
+          ),
+        ),
+      );
+
+      const graphql2 = `
+      {
+        c {
+          e {
+            f
+          }
+          d
+        }
+        b
+        a
+      }`;
+      const expected2 = query(
+        branch('c',
+          branch('e',
+            leaf('f'),
+          ),
+          leaf('d'),
+        ),
+        leaf('b'),
+        leaf('a'),
+      );
+
+      const options = {
+        preserveOrder: true,
+      };
+      const result1 = parser.parse(graphql1, options);
+      expect(result1).to.eql(expected1);
+
+      const result2 = parser.parse(graphql2, options);
+      expect(result2).to.eql(expected2);
+
+      expect(result1).to.not.eql(result2);
     });
 
     describe('Arguments', function() {
