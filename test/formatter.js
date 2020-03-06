@@ -19,11 +19,37 @@ describe('Formatter (whitespace stripper)', function() {
     others.forEach(query => expect(query).to.deep.equalInAnyOrder(first));
   }
 
-  function verifyFormatting(expected, input) {
-    const result = formatter.format(input);
+  function verifyFormatting(expected, input, options = { preserveOrder: true }) {
+    const result = formatter.format(input, options);
     expect(result).to.eql(expected);
     queriesProduceSameASTs(input, expected, result);
   }
+
+  it('default behavior is to preserve order of query', function() {
+    const query = `
+    {
+      b
+      a {
+        d
+        c
+      }
+    }`;
+    const expected = '{ b a { d c } }';
+    verifyFormatting(expected, query);
+  });
+
+  it('can be configured to sort alphabetically (per "depth")', function() {
+    const query = `
+    {
+      b
+      a {
+        d
+        c
+      }
+    }`;
+    const expected = '{ a { c d } b }';
+    verifyFormatting(expected, query, { preserveOrder: false });
+  });
 
   it('puts whitespace around curly braces and branch/leaf names', function() {
     const query = `
@@ -138,29 +164,29 @@ describe('Formatter (whitespace stripper)', function() {
 
     fragment Person on Roster {
       firstName
-      imageUrl
       lastName
+      imageUrl
     }
 
     fragment Record on TeamRecord {
+      wins
       losses
       ties
-      wins
     }
 
     fragment Logo on Image {
-      aspectRatio
       imageUrl
       primaryColor
       secondaryColor
+      aspectRatio
     }
 
     fragment TeamInfo on Franchise {
+      name
       description
       logo {
         ... Logo
       }
-      name
       record {
         ... Record
       }
@@ -172,10 +198,10 @@ describe('Formatter (whitespace stripper)', function() {
     const expected =
       '{ sport(league: "nhl") { franchise(name: "Avalanche") { ...TeamInfo ' +
       'rivals { ...TeamInfo } } } } ' +
-      'fragment Person on Roster { firstName imageUrl lastName } ' +
-      'fragment Record on TeamRecord { losses ties wins } ' +
-      'fragment Logo on Image { aspectRatio imageUrl primaryColor secondaryColor } ' +
-      'fragment TeamInfo on Franchise { description logo { ...Logo } name record { ...Record } roster { ...Person } }';
+      'fragment Person on Roster { firstName lastName imageUrl } ' +
+      'fragment Record on TeamRecord { wins losses ties } ' +
+      'fragment Logo on Image { imageUrl primaryColor secondaryColor aspectRatio } ' +
+      'fragment TeamInfo on Franchise { name description logo { ...Logo } record { ...Record } roster { ...Person } }';
     verifyFormatting(expected, query);
   });
 });
