@@ -210,6 +210,40 @@ describe('Parser for lexed tokens', function() {
         expect(parser.parse(graphql)).to.deep.equalInAnyOrder(expected);
       });
 
+      it('can parse multiple arguments on leaves and branches', function() {
+        const graphql = `
+        {
+          a(arg1: "hi", arg2: 12, arg3: YO) {
+            b(arg1: "boo")
+            c
+            d(arg1: "good", arg2: "ok") {
+              e
+              f
+            }
+          }
+        }`;
+        const expected = query(
+          branchWithArguments('a',
+            [
+              argument('arg1', 'hi', true),
+              argument('arg2', '12', false),
+              argument('arg3', 'YO', false),
+            ],
+            leaf('b', argument('arg1', 'boo', true),),
+            leaf('c'),
+            branchWithArguments('d',
+              [
+                argument('arg1', 'good', true),
+                argument('arg2', 'ok', true),
+              ],
+              leaf('e'),
+              leaf('f'),
+            ),
+          ),
+        );
+        expect(parser.parse(graphql)).to.deep.equalInAnyOrder(expected);
+      });
+
       it('can parse single argument on a complex field', function() {
         const graphql = `
         {

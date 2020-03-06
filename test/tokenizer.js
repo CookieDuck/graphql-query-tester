@@ -53,6 +53,44 @@ describe('String tokenizer', function() {
       const result = tokenizer.tokenize(`{files}`);
       expect(result).to.eql(['{', 'files', '}']);
     });
+
+    it('Handles a query that uses whitespace characters instead of spaces', function() {
+      /*
+      {
+        a(arg1: "good") {
+          b(arg1: 1)
+          c
+          ... on D {
+            e
+            ...f
+          }
+        }
+      }
+
+      fragment g on H {
+        i
+        j
+      }
+       */
+      const result = tokenizer.tokenize(`
+      {\ta(arg1:\t"good")\t{\tb(arg1:\t1)\tc\t...\ton\tD\t{\te...\tf\t}\t}\t}\tfragment\tg\ton\tH\t{\ti\tj\t}`);
+      expect(result).to.eql([
+        '{',
+          'a', '(', 'arg1', ':', '"', 'good', '"', ')', '{',
+            'b', '(', 'arg1', ':', '1', ')',
+            'c',
+            '...', 'on', 'D', '{',
+               'e',
+               '...', 'f',
+            '}',
+          '}',
+        '}',
+        'fragment', 'g', 'on', 'H', '{',
+          'i',
+          'j',
+        '}',
+      ]);
+    });
   });
 
   describe('Arguments', function() {

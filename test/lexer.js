@@ -188,6 +188,71 @@ describe('Lexer for tokens', function() {
         dict.GROUP_END,
       ]);
     });
+
+    it('Identifies leaves with arguments in a complex query', function() {
+      const graphql = `
+      {
+        a(arg1: "hi", arg2: 12, arg3: YO) {
+          b(arg1: "boo")
+          c
+          d(arg1: "good", arg2: "ok") {
+            e
+            f
+          }
+        }
+      }`;
+      const result = lexer.lex(tokenizer.tokenize(graphql));
+      const definitions = result.map(item => item.definition);
+      expect(definitions).to.eql([
+        dict.GROUP_START,
+          dict.FIELD_BRANCH,   //a start
+          dict.ARGUMENT_START,
+          dict.ARGUMENT_NAME,
+          dict.COLON,
+          dict.QUOTES,
+          dict.ARGUMENT_VALUE,
+          dict.QUOTES,
+          dict.COMMA,
+          dict.ARGUMENT_NAME,
+          dict.COLON,
+          dict.ARGUMENT_VALUE,
+          dict.COMMA,
+          dict.ARGUMENT_NAME,
+          dict.COLON,
+          dict.ARGUMENT_VALUE,
+          dict.ARGUMENT_END,
+          dict.GROUP_START,     // a end
+            dict.FIELD_LEAF,    // b start
+            dict.ARGUMENT_START,
+            dict.ARGUMENT_NAME,
+            dict.COLON,
+            dict.QUOTES,
+            dict.ARGUMENT_VALUE,
+            dict.QUOTES,
+            dict.ARGUMENT_END,  // b end
+            dict.FIELD_LEAF,    // c
+            dict.FIELD_BRANCH,  // d start
+            dict.ARGUMENT_START,
+            dict.ARGUMENT_NAME,
+            dict.COLON,
+            dict.QUOTES,
+            dict.ARGUMENT_VALUE,
+            dict.QUOTES,
+            dict.COMMA,
+            dict.ARGUMENT_NAME,
+            dict.COLON,
+            dict.QUOTES,
+            dict.ARGUMENT_VALUE,
+            dict.QUOTES,
+            dict.ARGUMENT_END,
+            dict.GROUP_START,    // d end
+              dict.FIELD_LEAF,   // e
+              dict.FIELD_LEAF,   // f
+            dict.GROUP_END,
+          dict.GROUP_END,
+        dict.GROUP_END,
+      ]);
+    });
   });
 
   describe('Fragments', function() {
