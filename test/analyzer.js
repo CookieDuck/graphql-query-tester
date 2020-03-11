@@ -52,4 +52,14 @@ describe('Query analyzer', function() {
 
     expect(analyzer.argumentsAtPath(graphql, 'a.b.c')).to.eql('c does not exist at path: a.b');
   });
+
+  it('reports how "far" it got when it stumbles, even on a long path', function() {
+    const graphql = `
+    {
+      a {
+        wontGetIt((arg1: "sorry")
+      }
+    }`;
+    expect(analyzer.argumentsAtPath(graphql, 'a.b.c.d.e.f.g.h.i.j')).to.eql('b does not exist at path: a');
+  });
 });
