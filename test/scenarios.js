@@ -15,8 +15,8 @@ const {
   query,
 } = require('../lib/structure');
 
-describe('complex scenarios', function() {
-  it('country details', function() {
+describe('complex scenarios', () => {
+  it('country details', () => {
     const identifier = "switzerland";
     const time = "2019-11-11T20:28:25.000Z";
     const limit = 50;
@@ -118,7 +118,7 @@ describe('complex scenarios', function() {
     expect(result).to.deep.equalInAnyOrder(expected);
   });
 
-  it('sports franchises with fragments', function() {
+  it('sports franchises with fragments', () => {
     const league = 'nhl';
     const teamName = 'Avalanche';
     const graphql = `

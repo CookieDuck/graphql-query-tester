@@ -8,7 +8,7 @@ const formatter = require('../lib/formatter');
 
 const R = require('ramda');
 
-describe('Formatter (whitespace stripper)', function() {
+describe('Formatter (whitespace stripper)', () => {
   function queriesProduceSameASTs(...queries) {
     if (queries.length < 2) {
       assert.fail('Invalid test setup.  Must have at least 2 queries to compare')
@@ -25,7 +25,7 @@ describe('Formatter (whitespace stripper)', function() {
     queriesProduceSameASTs(input, expected, result);
   }
 
-  it('default behavior is to preserve order of query', function() {
+  it('default behavior is to preserve order of query', () => {
     const query = `
     {
       b
@@ -38,7 +38,7 @@ describe('Formatter (whitespace stripper)', function() {
     verifyFormatting(expected, query);
   });
 
-  it('can be configured to sort alphabetically (per "depth")', function() {
+  it('can be configured to sort alphabetically (per "depth")', () => {
     const query = `
     {
       b
@@ -51,7 +51,7 @@ describe('Formatter (whitespace stripper)', function() {
     verifyFormatting(expected, query, { preserveOrder: false });
   });
 
-  it('puts whitespace around curly braces and branch/leaf names', function() {
+  it('puts whitespace around curly braces and branch/leaf names', () => {
     const query = `
     {
       a {
@@ -83,7 +83,7 @@ describe('Formatter (whitespace stripper)', function() {
     verifyFormatting(expected, query);
   });
 
-  it('puts aesthetically pleasing (to me) whitespace around arguments', function() {
+  it('puts aesthetically pleasing (to me) whitespace around arguments', () => {
     const query = `
     {
       a (arg1: "hi", arg2:   12, arg3:    YO   )  {
@@ -99,7 +99,7 @@ describe('Formatter (whitespace stripper)', function() {
     verifyFormatting(expected, query);
   });
 
-  it('formats inline fragments correctly', function() {
+  it('formats inline fragments correctly', () => {
     const query = `
     {
       files      {
@@ -120,7 +120,7 @@ describe('Formatter (whitespace stripper)', function() {
     verifyFormatting(expected, query);
   });
 
-  it('formats fragments and their declarations correctly', function() {
+  it('formats fragments and their declarations correctly', () => {
     const query = `
     {
       a
@@ -149,7 +149,7 @@ describe('Formatter (whitespace stripper)', function() {
     verifyFormatting(expected, query);
   });
 
-  it('can handle big, complicated scenarios', function() {
+  it('can handle big, complicated scenarios', () => {
     const query = `
     {
       sport(league: "nhl") {

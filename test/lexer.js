@@ -2,17 +2,17 @@ const expect = require('chai').expect;
 const tokenizer = require('../lib/tokenizer');
 const lexer = require('../lib/lexer');
 
-describe('Lexer for tokens', function() {
+describe('Lexer for tokens', () => {
   const dict = lexer.dictionary;
 
-  it('Assigns values to tokens', function() {
+  it('Assigns values to tokens', () => {
     const graphql = '{ files }';
     const result = lexer.lex(tokenizer.tokenize(graphql));
     const values = result.map((item) => item.value);
     expect(values).to.eql(['{', 'files', '}']);
   });
 
-  it('Assigns definitions to tokens', function() {
+  it('Assigns definitions to tokens', () => {
     const graphql = '{ paths { files } }';
     const result = lexer.lex(tokenizer.tokenize(graphql));
     const definitions = result.map((item) => item.definition);
@@ -26,14 +26,14 @@ describe('Lexer for tokens', function() {
     ]);
   });
 
-  it('Assigns indices to tokens', function() {
+  it('Assigns indices to tokens', () => {
     const graphql = '{ files }';
     const result = lexer.lex(tokenizer.tokenize(graphql));
     const indices = result.map((item) => item.index);
     expect(indices).to.eql([0, 1, 2]);
   });
 
-  it('Assigns depth to tokens', function() {
+  it('Assigns depth to tokens', () => {
     //  depth indicates 'nesting', which is why 'paths' and its open and close braces are on depth 1
     //  Depth levels are closely related to 'proper' indentation
     //  0 1 2
@@ -48,9 +48,9 @@ describe('Lexer for tokens', function() {
     expect(depths).to.eql([0, 1, 1, 2, 1, 0]);
   });
 
-  describe('Arguments', function() {
-    describe('Definitions per type', function() {
-      it('String', function() {
+  describe('Arguments', () => {
+    describe('Definitions per type', () => {
+      it('String', () => {
         const graphql = '{ files(extension: "txt") }';
         const result = lexer.lex(tokenizer.tokenize(graphql));
         const definitions = result.map((item) => item.definition);
@@ -64,7 +64,7 @@ describe('Lexer for tokens', function() {
         ]);
       });
 
-      it('Int', function() {
+      it('Int', () => {
         const graphql = '{ files(limit: 3) }';
         const result = lexer.lex(tokenizer.tokenize(graphql));
         const definitions = result.map((item) => item.definition);
@@ -76,7 +76,7 @@ describe('Lexer for tokens', function() {
         ]);
       });
 
-      it('Float', function() {
+      it('Float', () => {
         const graphql = '{ files(coolnessThreshold: 2.4) }';
         const result = lexer.lex(tokenizer.tokenize(graphql));
         const definitions = result.map((item) => item.definition);
@@ -88,7 +88,7 @@ describe('Lexer for tokens', function() {
         ]);
       });
 
-      it('Enum', function() {
+      it('Enum', () => {
         const graphql = '{ files(encoding: UTF_8) }';
         const result = lexer.lex(tokenizer.tokenize(graphql));
         const definitions = result.map((item) => item.definition);
@@ -101,7 +101,7 @@ describe('Lexer for tokens', function() {
       });
     });
 
-    it('Assigns definitions to argument tokens', function() {
+    it('Assigns definitions to argument tokens', () => {
       const graphql = '{ files(extension: "txt") }';
       const result = lexer.lex(tokenizer.tokenize(graphql));
       const definitions = result.map((item) => item.definition);
@@ -119,7 +119,7 @@ describe('Lexer for tokens', function() {
       ]);
     });
 
-    it('Assigns values to argument tokens', function() {
+    it('Assigns values to argument tokens', () => {
       const graphql = '{ files(extension: "txt", limit: 3) }';
       const result = lexer.lex(tokenizer.tokenize(graphql));
       const values = result.map((item) => item.value);
@@ -141,7 +141,7 @@ describe('Lexer for tokens', function() {
       ]);
     });
 
-    it('Handles multiple arguments on a field', function() {
+    it('Handles multiple arguments on a field', () => {
       const graphql = '{ files(extension: "txt", limit: 3) }';
       const result = lexer.lex(tokenizer.tokenize(graphql));
       const definitions = result.map((item) => item.definition);
@@ -163,7 +163,7 @@ describe('Lexer for tokens', function() {
       ]);
     });
 
-    it('Handles all sorts of multiple arguments on a scalar field', function() {
+    it('Handles all sorts of multiple arguments on a scalar field', () => {
       const graphql = '{ files(extension: "txt", limit: 3, fileEncoding: UTF_8) }';
       const result = lexer.lex(tokenizer.tokenize(graphql));
       const definitions = result.map((item) => item.definition);
@@ -189,7 +189,7 @@ describe('Lexer for tokens', function() {
       ]);
     });
 
-    it('Identifies leaves with arguments in a complex query', function() {
+    it('Identifies leaves with arguments in a complex query', () => {
       const graphql = `
       {
         a(arg1: "hi", arg2: 12, arg3: YO) {
@@ -255,9 +255,9 @@ describe('Lexer for tokens', function() {
     });
   });
 
-  describe('Fragments', function() {
-    describe('Normal', function() {
-      describe('simple fragment', function () {
+  describe('Fragments', () => {
+    describe('Normal', () => {
+      describe('simple fragment', () => {
         const graphql =
         `{
           files(name: "derp") {
@@ -270,7 +270,7 @@ describe('Lexer for tokens', function() {
           name
         }`;
 
-        it('handles definitions', function () {
+        it('handles definitions', () => {
           const result = lexer.lex(tokenizer.tokenize(graphql));
           const definitions = result.map((item) => item.definition);
           expect(definitions).to.eql([
@@ -303,7 +303,7 @@ describe('Lexer for tokens', function() {
           ]);
         });
 
-        it('handles values', function () {
+        it('handles values', () => {
           const result = lexer.lex(tokenizer.tokenize(graphql));
           const values = result.map((item) => item.value);
           expect(values).to.eql([
@@ -315,7 +315,7 @@ describe('Lexer for tokens', function() {
           ]);
         });
 
-        it('handles depths', function () {
+        it('handles depths', () => {
           const result = lexer.lex(tokenizer.tokenize(graphql));
           const depths = result.map((item) => item.depth);
           expect(depths).to.eql([
@@ -349,7 +349,7 @@ describe('Lexer for tokens', function() {
         });
       });
 
-      describe('complex fragment', function() {
+      describe('complex fragment', () => {
         const graphql = `
         {
           files(name: "derp") {
@@ -367,7 +367,7 @@ describe('Lexer for tokens', function() {
           }
         }`;
 
-        it('handles definitions', function() {
+        it('handles definitions', () => {
           const result = lexer.lex(tokenizer.tokenize(graphql));
           const definitions = result.map((item) => item.definition);
           expect(definitions).to.eql([
@@ -408,7 +408,7 @@ describe('Lexer for tokens', function() {
           ]);
         });
 
-        it('handles values', function() {
+        it('handles values', () => {
           const result = lexer.lex(tokenizer.tokenize(graphql));
           const values = result.map((item) => item.value);
           expect(values).to.eql([
@@ -423,7 +423,7 @@ describe('Lexer for tokens', function() {
           ]);
         });
 
-        it('handles depths', function() {
+        it('handles depths', () => {
           const result = lexer.lex(tokenizer.tokenize(graphql));
           const depths = result.map((item) => item.depth);
           expect(depths).to.eql([
@@ -464,8 +464,8 @@ describe('Lexer for tokens', function() {
       });
     });
 
-    describe('Inline', function() {
-      describe('simple', function() {
+    describe('Inline', () => {
+      describe('simple', () => {
         const graphql = `
         {
           files(name: "derp") {
@@ -476,7 +476,7 @@ describe('Lexer for tokens', function() {
           }
         }`;
 
-        it('handles definitions', function() {
+        it('handles definitions', () => {
           const result = lexer.lex(tokenizer.tokenize(graphql));
           const definitions = result.map((item) => item.definition);
           expect(definitions).to.eql([
@@ -504,7 +504,7 @@ describe('Lexer for tokens', function() {
           ]);
         });
 
-        it('handles values', function() {
+        it('handles values', () => {
           const result = lexer.lex(tokenizer.tokenize(graphql));
           const values = result.map((item) => item.value);
           expect(values).to.eql([
@@ -516,7 +516,7 @@ describe('Lexer for tokens', function() {
         });
       });
 
-      describe('complex', function() {
+      describe('complex', () => {
         const graphql = `
         {
           files(name: "derp") {
@@ -530,7 +530,7 @@ describe('Lexer for tokens', function() {
           }
         }`;
 
-        it('handles definitions', function() {
+        it('handles definitions', () => {
           const result = lexer.lex(tokenizer.tokenize(graphql));
           const definitions = result.map((item) => item.definition);
           expect(definitions).to.eql([
@@ -562,7 +562,7 @@ describe('Lexer for tokens', function() {
           ]);
         });
 
-        it('handles values', function() {
+        it('handles values', () => {
           const result = lexer.lex(tokenizer.tokenize(graphql));
           const values = result.map((item) => item.value);
           expect(values).to.eql([
@@ -576,7 +576,7 @@ describe('Lexer for tokens', function() {
         });
       });
 
-      describe('multiple', function() {
+      describe('multiple', () => {
         const graphql = `
         {
           files(name: "derp") {
@@ -591,7 +591,7 @@ describe('Lexer for tokens', function() {
           }
         }`;
 
-        it('handles definitions', function() {
+        it('handles definitions', () => {
           const result = lexer.lex(tokenizer.tokenize(graphql));
           const definitions = result.map((item) => item.definition);
           expect(definitions).to.eql([
@@ -629,7 +629,7 @@ describe('Lexer for tokens', function() {
           ]);
         });
 
-        it('handles values', function() {
+        it('handles values', () => {
           const result = lexer.lex(tokenizer.tokenize(graphql));
           const values = result.map((item) => item.value);
           expect(values).to.eql([
@@ -645,8 +645,8 @@ describe('Lexer for tokens', function() {
         });
       });
 
-      describe('errors', function() {
-        it('throws a syntax error when a fragment does not have a definition', function () {
+      describe('errors', () => {
+        it('throws a syntax error when a fragment does not have a definition', () => {
           const graphql = `
           {
             files(name: "derp") {
@@ -660,7 +660,7 @@ describe('Lexer for tokens', function() {
             "Available fragment definitions: []");
         });
 
-        it('throws a syntax error when a fragment is referenced but has no corresponding definition', function() {
+        it('throws a syntax error when a fragment is referenced but has no corresponding definition', () => {
           const graphql = `
           {
             files(name: "derp") {
@@ -687,15 +687,15 @@ describe('Lexer for tokens', function() {
     });
   });
 
-  describe('Lexing errors', function() {
-    describe('Throws Syntax error', function() {
-      it('When too many open curly braces', function() {
+  describe('Lexing errors', () => {
+    describe('Throws Syntax error', () => {
+      it('When too many open curly braces', () => {
         const tokens = tokenizer.tokenize('{ bad { }');
 
         expect(() => lexer.lex(tokens)).to.throw("Syntax error: Found 2 '{' but only 1 '}'");
       });
 
-      it('When too many close curly braces', function() {
+      it('When too many close curly braces', () => {
         const tokens = tokenizer.tokenize('{ bad { } } }');
 
         expect(() => lexer.lex(tokens)).to.throw("Syntax error: Found 3 '}' but only 2 '{'");

@@ -16,9 +16,9 @@ const {
   query,
 } = require('../lib/structure');
 
-describe('Parser for lexed tokens', function() {
-  describe('Happy path', function() {
-    it('Parses a simple query', function() {
+describe('Parser for lexed tokens', () => {
+  describe('Happy path', () => {
+    it('Parses a simple query', () => {
       const graphql = `
       {
         files
@@ -35,7 +35,7 @@ describe('Parser for lexed tokens', function() {
       expect(result).to.eql(expected);
     });
 
-    it('Parses a slightly complex query', function() {
+    it('Parses a slightly complex query', () => {
       const graphql = `
       {
         images {
@@ -54,7 +54,7 @@ describe('Parser for lexed tokens', function() {
       expect(result).to.deep.equalInAnyOrder(expected);
     });
 
-    it('Parses a more complex query', function() {
+    it('Parses a more complex query', () => {
       const graphql = `
       {
         images {
@@ -95,7 +95,7 @@ describe('Parser for lexed tokens', function() {
       expect(result).to.deep.equalInAnyOrder(expected);
     });
 
-    it('Equivalent queries but in different order produce equivalent ASTs when preserveOrder = false', function() {
+    it('Equivalent queries but in different order produce equivalent ASTs when preserveOrder = false', () => {
       const graphql1 = `
       {
         a
@@ -139,7 +139,7 @@ describe('Parser for lexed tokens', function() {
       expect(result2).to.eql(expected);
     });
 
-    it('Equivalent queries in different order produce strictly ordered parsed ASTs when preserveOrder = true', function() {
+    it('Equivalent queries in different order produce strictly ordered parsed ASTs when preserveOrder = true', () => {
       const graphql1 = `
       {
         a
@@ -196,9 +196,9 @@ describe('Parser for lexed tokens', function() {
       expect(result1).to.not.eql(result2);
     });
 
-    describe('Arguments', function() {
-      describe('Types', function() {
-        it('Int', function() {
+    describe('Arguments', () => {
+      describe('Types', () => {
+        it('Int', () => {
           const graphql = '{ files(limit: 3) }';
           const expected = query(
             leaf('files',
@@ -208,7 +208,7 @@ describe('Parser for lexed tokens', function() {
           expect(parser.parse(graphql)).to.deep.equalInAnyOrder(expected);
         });
 
-        it('Float', function() {
+        it('Float', () => {
           const graphql = '{ files(coolnessThreshold: 2.4) }';
           const expected = query(
             leaf('files',
@@ -218,7 +218,7 @@ describe('Parser for lexed tokens', function() {
           expect(parser.parse(graphql)).to.deep.equalInAnyOrder(expected);
         });
 
-        it('Enum', function() {
+        it('Enum', () => {
           const graphql = '{ files(encoding: UTF_8) }';
           const expected = query(
             leaf('files',
@@ -228,7 +228,7 @@ describe('Parser for lexed tokens', function() {
           expect(parser.parse(graphql)).to.deep.equalInAnyOrder(expected);
         });
 
-        it('String', function() {
+        it('String', () => {
           const graphql = '{ files(extension: "txt") }';
           const expected = query(
             leaf('files',
@@ -239,7 +239,7 @@ describe('Parser for lexed tokens', function() {
         });
       });
 
-      it('can parse single argument on a leaf field', function() {
+      it('can parse single argument on a leaf field', () => {
         const graphql = `
         {
           images {
@@ -258,7 +258,7 @@ describe('Parser for lexed tokens', function() {
         expect(result).to.deep.equalInAnyOrder(expected);
       });
 
-      it('can parse multiple arguments on a leaf field', function() {
+      it('can parse multiple arguments on a leaf field', () => {
         const graphql = '{ files(extension: "txt", limit: 3, fileEncoding: UTF_8) }';
         const expected = query(
           leaf('files',
@@ -270,7 +270,7 @@ describe('Parser for lexed tokens', function() {
         expect(parser.parse(graphql)).to.deep.equalInAnyOrder(expected);
       });
 
-      it('can parse multiple arguments on leaves and branches', function() {
+      it('can parse multiple arguments on leaves and branches', () => {
         const graphql = `
         {
           a(arg1: "hi", arg2: 12, arg3: YO) {
@@ -304,7 +304,7 @@ describe('Parser for lexed tokens', function() {
         expect(parser.parse(graphql)).to.deep.equalInAnyOrder(expected);
       });
 
-      it('can parse single argument on a complex field', function() {
+      it('can parse single argument on a complex field', () => {
         const graphql = `
         {
           images(type: "jpg") {
@@ -322,7 +322,7 @@ describe('Parser for lexed tokens', function() {
         expect(result).to.deep.equalInAnyOrder(expected);
       });
 
-      it('can parse multiple arguments on a complex field', function() {
+      it('can parse multiple arguments on a complex field', () => {
         const graphql = `
         {
           files(extension: "txt", limit: 3, fileEncoding: UTF_8) {
@@ -342,7 +342,7 @@ describe('Parser for lexed tokens', function() {
         expect(parser.parse(graphql)).to.deep.equalInAnyOrder(expected);
       });
 
-      it('can parse multiple arguments on different fields', function() {
+      it('can parse multiple arguments on different fields', () => {
         const graphql = `
         {
           files(extension: "txt") {
@@ -371,9 +371,9 @@ describe('Parser for lexed tokens', function() {
       });
     });
 
-    describe('Fragments', function() {
-      describe('Normal', function() {
-        it('handles declaration of simple fragment', function() {
+    describe('Fragments', () => {
+      describe('Normal', () => {
+        it('handles declaration of simple fragment', () => {
           const graphql = `
           {
             files(name: "derp") {
@@ -403,7 +403,7 @@ describe('Parser for lexed tokens', function() {
           expect(result).to.deep.equalInAnyOrder(expected);
         });
 
-        it('handles declaration of complex fragment', function() {
+        it('handles declaration of complex fragment', () => {
           const graphql = `{
             files(name: "derp") {
               ...fileFields
@@ -446,7 +446,7 @@ describe('Parser for lexed tokens', function() {
           expect(result).to.deep.equalInAnyOrder(expected);
         });
 
-        it('handles multiple declarations', function() {
+        it('handles multiple declarations', () => {
           const graphql = `{
             files(name: "derp") {
               ...fileFields
@@ -505,8 +505,8 @@ describe('Parser for lexed tokens', function() {
         });
       });
 
-      describe('Inline', function() {
-        it('handles single', function() {
+      describe('Inline', () => {
+        it('handles single', () => {
           const graphql = `
           {
             files(name: "derp") {
@@ -532,7 +532,7 @@ describe('Parser for lexed tokens', function() {
           expect(result).to.deep.equalInAnyOrder(expected);
         });
 
-        it('handles multiple', function() {
+        it('handles multiple', () => {
           const graphql = `
           {
             files {
@@ -570,7 +570,7 @@ describe('Parser for lexed tokens', function() {
         });
       });
 
-      it('Handles Fragment within a Fragment', function() {
+      it('Handles Fragment within a Fragment', () => {
         const graphql = `
         {
           files(limit: 20) {
@@ -614,8 +614,8 @@ describe('Parser for lexed tokens', function() {
         expect(result).to.deep.equalInAnyOrder(expected);
       });
 
-      describe('Errors', function() {
-        it('returns error when a fragment is declared but is not used', function() {
+      describe('Errors', () => {
+        it('returns error when a fragment is declared but is not used', () => {
           const graphql = `
           {
             files(name: "derp") {
@@ -636,10 +636,10 @@ describe('Parser for lexed tokens', function() {
           expect(error).to.equal(expectedError);
         });
 
-        describe('Fragment declaration errors', function() {
+        describe('Fragment declaration errors', () => {
           const expectedError = "Syntax error: Fragment 'fileFields' has no definition.  Available fragment definitions: []";
 
-          it('when "fragment" keyword is not the first word', function () {
+          it('when "fragment" keyword is not the first word', () => {
             const graphql = `
             {
               files {
@@ -655,7 +655,7 @@ describe('Parser for lexed tokens', function() {
             expect(error).to.equal(expectedError);
           });
 
-          it('when fragment variable name is not between "fragment" and "on"', function() {
+          it('when fragment variable name is not between "fragment" and "on"', () => {
             const graphql = `
             {
               files {
@@ -671,7 +671,7 @@ describe('Parser for lexed tokens', function() {
             expect(error).to.equal(expectedError);
           });
 
-          it('when "on" keyword is not between name and type', function() {
+          it('when "on" keyword is not between name and type', () => {
             const graphql = `
             {
               files {
@@ -687,7 +687,7 @@ describe('Parser for lexed tokens', function() {
             expect(error).to.equal(expectedError);
           });
 
-          it('when type is not between "on" and "{"', function() {
+          it('when type is not between "on" and "{"', () => {
             const graphql = `
             {
               files {
@@ -707,14 +707,14 @@ describe('Parser for lexed tokens', function() {
     });
   });
 
-  describe('Sad path', function() {
-    describe('Lexing errors', function() {
-      describe('Returns object with error', function() {
-        it('When too many open curly braces', function() {
+  describe('Sad path', () => {
+    describe('Lexing errors', () => {
+      describe('Returns object with error', () => {
+        it('When too many open curly braces', () => {
           expect(parser.parse('{ bad { }').error).to.equal("Syntax error: Found 2 '{' but only 1 '}'");
         });
 
-        it('When too many close curly braces', function() {
+        it('When too many close curly braces', () => {
           expect(parser.parse('{ bad { } } }').error).to.equal("Syntax error: Found 3 '}' but only 2 '{'");
         });
       });

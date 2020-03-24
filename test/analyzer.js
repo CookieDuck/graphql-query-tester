@@ -8,9 +8,9 @@ const analyzer = require('../lib/analyzer');
 const ARGUMENT_TYPE = require('../lib/structure').ARGUMENT_TYPE;
 const dict = require('../lib/lexer').dictionary;
 
-describe('Query analyzer', function() {
-  describe('arguments', function() {
-    it('can retrieve an arguments list at a path', function() {
+describe('Query analyzer', () => {
+  describe('arguments', () => {
+    it('can retrieve an arguments list at a path', () => {
       const graphql = `
       {
         a {
@@ -42,7 +42,7 @@ describe('Query analyzer', function() {
       expect(analyzer.argumentsAtPath(graphql,'a.b.c')).to.eql(expected);
     });
 
-    it('reports how "far" it got when encountering a path does not exist', function() {
+    it('reports how "far" it got when encountering a path does not exist', () => {
       const graphql = `
       {
         a {
@@ -55,7 +55,7 @@ describe('Query analyzer', function() {
       expect(analyzer.argumentsAtPath(graphql, 'a.b.c')).to.eql('c does not exist at path: a.b');
     });
 
-    it('reports how "far" it got when it stumbles, even on a long path', function() {
+    it('reports how "far" it got when it stumbles, even on a long path', () => {
       const graphql = `
       {
         a {
@@ -67,8 +67,8 @@ describe('Query analyzer', function() {
     });
   });
 
-  describe('tree', function() {
-    it('returns the subtree rooted at the requested path', function() {
+  describe('tree', () => {
+    it('returns the subtree rooted at the requested path', () => {
       const graphql = `
       {
         a {
@@ -111,7 +111,7 @@ describe('Query analyzer', function() {
       expect(analyzer.treeAtPath(graphql, 'a.b.c')).to.eql(subtree);
     });
 
-    it('returns an error when the tree does not have the requested path', function() {
+    it('returns an error when the tree does not have the requested path', () => {
       const graphql = `
       {
         a {
