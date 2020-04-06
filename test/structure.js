@@ -1,4 +1,6 @@
+const deepEqualInAnyOrder = require('deep-equal-in-any-order');
 const chai = require('chai');
+chai.use(deepEqualInAnyOrder);
 const { expect } = chai;
 
 const dict = require('../lib/lexer').dictionary;
