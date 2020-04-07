@@ -1,6 +1,6 @@
 {
-  "name": "graphql-query-tester",
-  "version": "0.0.1",
+  "name": "graphql-query-utility",
+  "version": "1.0.0",
   "description": "Library for testing graphql queries",
   "main": "index.js",
   "scripts": {
@@ -12,8 +12,11 @@
   },
   "keywords": [
     "graphql",
+    "query",
     "test",
-    "testing"
+    "testing",
+    "util",
+    "utility"
   ],
   "author": "Paul Ganster",
   "license": "GPL-3.0",
@@ -28,5 +31,8 @@
   },
   "dependencies": {
     "ramda": "^0.26.1"
-  }
+  },
+  "files": [
+    "index.js"
+  ]
 }
