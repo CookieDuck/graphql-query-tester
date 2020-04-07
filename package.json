@@ -1,6 +1,6 @@
 {
   "name": "graphql-query-utility",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Library for testing graphql queries",
   "main": "index.js",
   "scripts": {
@@ -33,6 +33,7 @@
     "ramda": "^0.26.1"
   },
   "files": [
-    "index.js"
+    "index.js",
+    "lib/"
   ]
 }
